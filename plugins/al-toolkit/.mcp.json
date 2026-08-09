@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "al": {
+      "type": "stdio",
+      "command": "cmd",
+      "args": [
+        "/c",
+        "${CLAUDE_PLUGIN_ROOT}/scripts/al-mcp.cmd"
+      ]
+    }
+  }
+}

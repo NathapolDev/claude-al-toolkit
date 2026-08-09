@@ -1,0 +1,16 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "al-toolkit-marketplace",
+  "owner": {
+    "name": "Nathapol",
+    "email": "nathapoj@gmail.com"
+  },
+  "description": "Internal marketplace distributing the al-toolkit plugin (AL MCP server + al-analyst/al-developer/al-reviewer skills) for Business Central AL development.",
+  "plugins": [
+    {
+      "name": "al-toolkit",
+      "source": "./plugins/al-toolkit",
+      "description": "AL Language MCP server plus the al-analyst / al-developer / al-reviewer skill pipeline for Business Central AL development."
+    }
+  ]
+}

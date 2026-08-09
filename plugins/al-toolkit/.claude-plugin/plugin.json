@@ -1,0 +1,16 @@
+{
+  "name": "al-toolkit",
+  "description": "AL Language MCP server (al) plus the al-analyst / al-developer / al-reviewer skill pipeline for Business Central AL development.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Nathapol",
+    "email": "nathapoj@gmail.com"
+  },
+  "keywords": [
+    "business-central",
+    "al",
+    "bc365",
+    "mcp",
+    "dynamics-365"
+  ]
+}
