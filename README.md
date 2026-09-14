@@ -21,10 +21,13 @@ at every stage that produces code.
 The AL toolchain is **not** shipped inside this plugin — `altool.exe` and `alc.exe` are
 Microsoft's binaries. Each machine needs:
 
-- **Windows.** The launchers are `.cmd`, and the AL extension ships Windows binaries under
-  `bin/win32` only.
+- **Windows.** The launchers are `.cmd`, and the AL extension ships Windows binaries only
+  (`bin\` on AL 18+, `bin\win32\` on older versions — both are resolved).
 - **VS Code** with the **AL Language** extension (`ms-dynamics-smb.al-*`, normally under
   `%USERPROFILE%\.vscode\extensions`).
+- **.NET 10 x64 runtime** for AL Language 18+ (`altool` needs ASP.NET Core 10). If it isn't
+  installed machine-wide, the scripts fall back to the runtime VS Code downloads for the AL
+  extension. To install it permanently: `winget install Microsoft.DotNet.AspNetCore.10`.
 - **Claude Code**, started from inside the AL project folder — `altool` needs a project
   path to resolve symbols against.
 
@@ -44,7 +47,7 @@ edits needed:
 
 ```powershell
 # point straight at the folder holding altool.exe / alc.exe
-setx AL_BIN "D:\tools\al\bin\win32"
+setx AL_BIN "D:\tools\al\bin"
 
 # or point at the extensions root and let the script pick the newest AL version
 setx AL_EXTENSIONS_DIR "D:\vscode-extensions"
@@ -250,6 +253,7 @@ After changing skills or rules here:
 | `claude mcp list` doesn't show `al` | AL Language extension missing, or in a non-default location — set `AL_BIN` / `AL_EXTENSIONS_DIR`. |
 | `al_*` tools "not found" | They're deferred; Claude loads them via ToolSearch on demand. If they never load, the MCP server isn't connected. |
 | `[find-al-bin] Could not find altool.exe` | Install the AL Language extension, or set `AL_BIN` to the folder holding the executables. |
+| `You must install or update .NET to run this application` / `[find-dotnet-root] … not installed` | AL Language 18+ needs .NET 10 x64 — `winget install Microsoft.DotNet.AspNetCore.10`. |
 | `error AL1021: The package cache path has not been specified` | No `.alpackages` in the project — download symbols first (`al_downloadsymbols`, or AL: Download Symbols in VS Code). |
 | `error AL1022: … could not be found in the package cache` | Symbols are missing or stale for the `application` / `platform` version in `app.json`. |
 | Skills load but every build is "NOT VERIFIED" | Claude Code wasn't started inside the AL project folder, or no symbols are present. |

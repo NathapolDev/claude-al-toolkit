@@ -27,6 +27,9 @@ if not defined ALBIN (
   exit /b 1
 )
 
+rem AL 18+ alc needs .NET 10; borrow VS Code's runtime if not installed.
+for /f "delims=" %%R in ('call "%~dp0find-dotnet-root.cmd" "%ALBIN%\alc.exe"') do set "DOTNET_ROOT=%%R"
+
 set "PROJECT=%~1"
 if not defined PROJECT set "PROJECT=%CD%"
 if not exist "%PROJECT%\app.json" (
@@ -44,13 +47,16 @@ if not exist "%PKGCACHE%\" (
 set "PKGARG=/packagecachepath:"%PKGCACHE%""
 
 rem Map friendly cop names onto the analyzer DLLs shipped with the extension.
+rem AL 18+ keeps them next to alc.exe; AL 17 and older in bin\Analyzers.
+set "ANADIR=%ALBIN%\..\Analyzers"
+if exist "%ALBIN%\Microsoft.Dynamics.Nav.CodeCop.dll" set "ANADIR=%ALBIN%"
 set "ANALYZERARGS="
 if defined AL_ANALYZERS (
   for %%A in ("%AL_ANALYZERS:;=" "%") do (
     set "COP=%%~A"
     if not "!COP!"=="" (
-      if exist "%ALBIN%\..\Analyzers\Microsoft.Dynamics.Nav.!COP!.dll" (
-        set "ANALYZERARGS=!ANALYZERARGS! /analyzer:"%ALBIN%\..\Analyzers\Microsoft.Dynamics.Nav.!COP!.dll""
+      if exist "%ANADIR%\Microsoft.Dynamics.Nav.!COP!.dll" (
+        set "ANALYZERARGS=!ANALYZERARGS! /analyzer:"%ANADIR%\Microsoft.Dynamics.Nav.!COP!.dll""
       ) else (
         echo [al-build] Warning: analyzer "!COP!" not found - skipped. 1>&2
       )
