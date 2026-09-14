@@ -20,6 +20,7 @@ plugins/al-toolkit/
   .claude-plugin/plugin.json             plugin manifest (name, version, author)
   .mcp.json                              registers the `al` MCP server (auto-detected at plugin root)
   scripts/find-al-bin.cmd                shared AL toolchain path resolver
+  scripts/find-dotnet-root.cmd           .NET runtime fallback (DOTNET_ROOT) for AL 18+
   scripts/al-mcp.cmd                     MCP server launcher  -> altool.exe launchmcpserver
   scripts/al-build.cmd                   build fallback       -> alc.exe
   references/al-rules.md                 canonical AL house rules (single source of truth)
@@ -39,10 +40,21 @@ Two invariants hold the distribution together:
 ### Path resolution (`find-al-bin.cmd`)
 
 Both runnable scripts delegate discovery to `find-al-bin.cmd <exeName>`, which prints the
-resolved `bin\win32` folder to stdout (exit 0) or a diagnostic to stderr (exit 1). Callers
+resolved bin folder to stdout (exit 0) or a diagnostic to stderr (exit 1). Callers
 capture it with `for /f`. Search order: `%AL_BIN%` → `%AL_EXTENSIONS_DIR%` →
 `%VSCODE_EXTENSIONS%` → VS Code stable/Insiders/Server/OSS user roots → portable and
-Program Files installs; newest `ms-dynamics-smb.al-*` folder wins within a root.
+Program Files installs; newest `ms-dynamics-smb.al-*` folder wins within a root. Inside an
+extension folder it checks `bin\` (AL 18+) before `bin\win32\` (AL 17 and older).
+
+### .NET runtime (`find-dotnet-root.cmd`)
+
+AL 18+ executables target `net10.0` (`altool` also needs `Microsoft.AspNetCore.App`).
+`find-dotnet-root.cmd <exePath>` reads `<exe>.runtimeconfig.json`, and when neither
+`DOTNET_ROOT` is set nor `%ProgramFiles%\dotnet` has that framework, prints the newest
+matching runtime downloaded by the VS Code .NET Install Tool
+(`%APPDATA%\Code\User\globalStorage\ms-dotnettools.vscode-dotnet-runtime\.dotnet`). Both
+launchers capture it into `DOTNET_ROOT`. It always exits 0; if nothing fits it only warns
+and the executable reports the real error.
 
 Add new machine layouts to the candidate list in that one script — do not add lookup
 logic to `al-mcp.cmd` or `al-build.cmd`.
@@ -50,7 +62,7 @@ logic to `al-mcp.cmd` or `al-build.cmd`.
 Environment overrides: `AL_BIN`, `AL_EXTENSIONS_DIR`, `AL_PROJECT_DIR` (project handed to
 the MCP server, default `%CD%`), `AL_PACKAGECACHE` (default `<project>\.alpackages`),
 `AL_ANALYZERS` (semicolon list of cop names, mapped to
-`bin\Analyzers\Microsoft.Dynamics.Nav.<Cop>.dll`).
+`Microsoft.Dynamics.Nav.<Cop>.dll` next to `alc.exe` on AL 18+, `bin\Analyzers\` before).
 
 ### `alc.exe` always exits 0
 
@@ -86,7 +98,8 @@ There is no test runner. Verify by exercising the scripts directly (PowerShell 7
 $s = "plugins\al-toolkit\scripts"
 
 # resolver: happy path, override, and failure path
-cmd /c "$s\find-al-bin.cmd altool.exe"          # -> ...\bin\win32, exit 0
+cmd /c "$s\find-al-bin.cmd altool.exe"          # -> ...\bin (AL 18+) or ...\bin\win32, exit 0
+cmd /c "$s\find-dotnet-root.cmd <bin>\altool.exe"  # -> empty if .NET 10 installed, else VS Code runtime
 cmd /c "$s\find-al-bin.cmd nope.exe"            # -> stderr guidance, exit 1
 $env:AL_BIN = "C:\bogus"; cmd /c "$s\find-al-bin.cmd alc.exe"   # warns, falls through
 
@@ -124,9 +137,7 @@ otherwise version-pinned installs won't pick them up. Consumers then run
 ## Constraints
 
 - **Windows-only by design** — launchers are `.cmd` and the AL extension ships
-  `altool.exe` / `alc.exe` under `bin/win32` only. Keep scripts as batch; PowerShell 7
+  Windows `altool.exe` / `alc.exe` only. Keep scripts as batch; PowerShell 7
   (`pwsh`) is the preferred shell for *running* them, not for rewriting them.
 - Batch scripts use `setlocal enabledelayedexpansion` with `!VAR!` inside `for` bodies —
   preserve this when editing, `%VAR%` expands at parse time and silently misbehaves.
-- This repo is currently **not a git repository**; the git-based install path in
-  `README.md` requires `git init` and a push first.

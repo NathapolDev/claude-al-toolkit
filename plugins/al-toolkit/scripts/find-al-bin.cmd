@@ -46,6 +46,8 @@ for %%R in (
 ) do (
   if not defined FOUND if not "%%~R"=="" if exist "%%~R\" (
     for /f "delims=" %%D in ('dir /b /ad /o-d "%%~R\ms-dynamics-smb.al-*" 2^>nul') do (
+      rem AL 18+ ships the toolchain flat in bin; AL 17 and older used bin\win32.
+      if not defined FOUND if exist "%%~R\%%D\bin\!WANT!" set "FOUND=%%~R\%%D\bin"
       if not defined FOUND if exist "%%~R\%%D\bin\win32\!WANT!" set "FOUND=%%~R\%%D\bin\win32"
     )
   )
