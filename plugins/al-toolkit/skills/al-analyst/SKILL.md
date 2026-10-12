@@ -6,6 +6,16 @@ description: >-
 
 # AL Requirement Analysis (al-analyst)
 
+## Installed paths and workspace
+All relative paths below resolve from the directory containing this `SKILL.md`,
+not from the user's working directory. Resolve them to absolute paths before reading
+references or invoking scripts; quote paths in shell commands.
+Use the connected AL MCP tools automatically. Before project operations, call `al_addproject`
+with the intended folder containing `app.json` to load it into the workspace.
+Pass its absolute `projectPath` to subsequent tools,
+especially when multiple projects are loaded. Never use the installed plugin as the AL
+project. If a named tool is unavailable, report that limitation instead of inventing it.
+
 Act as a Business Central / AL Solution Analyst. Take a requirement (Thai or English)
 and analyze HOW it should be implemented. Do NOT write production code here — produce
 an Analysis / Solution Design that the al-developer skill can implement directly.
@@ -13,7 +23,7 @@ an Analysis / Solution Design that the al-developer skill can implement directly
 Ground every decision in the official Microsoft AL guidelines and
 https://alguidelines.dev/docs/bestpractices/ and https://alguidelines.dev/docs/patterns/.
 For the full house coding rules, see
-`${CLAUDE_PLUGIN_ROOT}/references/al-rules.md` (canonical).
+`../../references/al-rules.md` (canonical).
 
 ## Workflow
 1. **Understand the requirement** — restate the business + functional intent; identify
@@ -24,7 +34,7 @@ For the full house coding rules, see
    rules incl. affix), and platform/runtime version (limits available AL features).
 3. **Find extension points** — available IntegrationEvent / BusinessEvent publishers,
    interfaces, extensible enums. Verify they actually exist:
-   - `al_symbolsearch` (AL MCP, when connected — load via ToolSearch) to search events,
+   - `al_symbolsearch` (AL MCP, when connected — discover through the available tool-search facility, if needed) to search events,
      objects, and fields across the project and its dependencies.
    - Microsoft Learn MCP (`microsoft_docs_search` / `microsoft_docs_fetch`) to confirm
      base-app events, APIs, and platform behavior.
@@ -36,8 +46,7 @@ For the full house coding rules, see
    permissions, sensitive data. Always cover:
    - **DataClassification / privacy** for any new field that stores personal or
      sensitive data.
-   - **Permission sets** — new objects need permission set coverage; point to the
-     `bc365-permissionset` skill for creation/analysis.
+   - **Permission sets** — new objects need permission set coverage; use the project's permission sets; use an optional permissions skill only if installed.
    - **Upgrade** — schema changes to existing data need upgrade code with Upgrade Tags.
 6. **Deliver** the analysis in the format below.
 
@@ -93,6 +102,6 @@ For the full house coding rules, see
   **al-developer** skill.
 
 ## Reference
-- Canonical house rules: `${CLAUDE_PLUGIN_ROOT}/references/al-rules.md`
+- Canonical house rules: `../../references/al-rules.md`
 - AL Best Practices: https://alguidelines.dev/docs/bestpractices/
 - Design Patterns: https://alguidelines.dev/docs/patterns/

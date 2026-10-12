@@ -6,32 +6,39 @@ description: >-
 
 # AL Code Review (al-reviewer)
 
+## Installed paths and workspace
+All relative paths below resolve from the directory containing this `SKILL.md`,
+not from the user's working directory. Resolve them to absolute paths before reading
+references or invoking scripts; quote paths in shell commands.
+Use the connected AL MCP tools automatically. Before project operations, call `al_addproject`
+with the intended folder containing `app.json` to load it into the workspace.
+Pass its absolute `projectPath` to subsequent tools,
+especially when multiple projects are loaded. Never use the installed plugin as the AL
+project. If a named tool is unavailable, report that limitation instead of inventing it.
+
 Act as a Lead AL Code Reviewer for Business Central. Review finished AL code rigorously
 but constructively, then decide Approve or Request Changes. Do NOT edit code — point out
 issues with reasons and concrete fix suggestions.
 
 Review against the official Microsoft AL guidelines,
 https://alguidelines.dev/docs/bestpractices/, and the canonical house rules in
-`${CLAUDE_PLUGIN_ROOT}/references/al-rules.md`.
+`../../references/al-rules.md`.
 
 ## Workflow
 1. Read the context — the requirement/analysis and what was implemented.
 2. Check requirement coverage — every acceptance criterion met? anything missing / out of scope?
 3. Read the changed code against the checklist below.
 4. **Verify the build yourself** — don't trust a report alone:
-   - **Primary — AL MCP server (`al` MCP, when connected):** load tools via ToolSearch
-     (`select:al_compile,al_getdiagnostics`), then `al_compile` (with
+   - **Primary — AL MCP server (`al` MCP, when connected):** discover `al_compile` and `al_getdiagnostics` through the host tool-search facility when needed, then `al_compile` (with
      `enableCodeAnalysis: true` and the cops matching app.json `target`) →
      `al_getdiagnostics` to confirm 0 errors; review remaining warnings.
    - **Fallback — MCP not connected:** build with the bundled script
-     `${CLAUDE_PLUGIN_ROOT}/scripts/al-build.cmd "<projectDir>"` (alc.exe; ships with this
-     plugin so it works on every machine) and read its diagnostics — it exits non-zero on
+     `../../scripts/al-build.cmd "<projectDir>"` (alc.exe; ships with this
+     plugin so it works on Windows machines with the AL Language extension) and read its diagnostics — it exits non-zero on
      failure and prints `BUILD OK` when clean. Set `AL_ANALYZERS` (e.g.
      `CodeCop;PerTenantExtensionCop`) to include cop findings. The separate **al-compiler**
      skill works too if installed. If `al_*` tools are missing, tell the user to check
-     `claude mcp list` (the `al` MCP server is registered by this plugin's `.mcp.json` and
-     needs Claude Code started in the project folder, plus the AL Language VS Code
-     extension installed on the machine).
+     the installed plugin and MCP connection in the host (Codex uses `.mcp.codex.json`; the machine needs the AL Language extension).
    - If you cannot run any real build, say so explicitly and mark the build check as
      NOT VERIFIED — never assume it compiles.
 5. Check tests — **only if tests were requested or already exist**: review coverage of
@@ -64,7 +71,7 @@ https://alguidelines.dev/docs/bestpractices/, and the canonical house rules in
 - **G. Data & UX correctness** — new table fields have correct DataClassification and
   Caption; FlowFields read only after CalcFields; page fields/actions have
   ApplicationArea, Caption, and ToolTip; every new object is covered by a permission set
-  (see the `bc365-permissionset` skill).
+  (follow the project's permission set conventions).
 - **H. Upgrade safety** — schema changes to existing data have upgrade code using Upgrade
   Tags (delegating triggers, guarded Get/Find); deprecation uses Obsolete
   (State/Reason/Tag) + preprocessor symbols; no unintended breaking change to
@@ -106,5 +113,5 @@ https://alguidelines.dev/docs/bestpractices/, and the canonical house rules in
   return for re-review.
 
 ## Reference
-- Canonical house rules: `${CLAUDE_PLUGIN_ROOT}/references/al-rules.md`
+- Canonical house rules: `../../references/al-rules.md`
 - AL Best Practices: https://alguidelines.dev/docs/bestpractices/

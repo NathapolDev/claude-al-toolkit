@@ -49,7 +49,9 @@ if defined AL_ANALYZERS (
   for %%A in ("%AL_ANALYZERS:;=" "%") do (
     set "COP=%%~A"
     if not "!COP!"=="" (
-      if exist "%ALBIN%\..\Analyzers\Microsoft.Dynamics.Nav.!COP!.dll" (
+      if exist "%ALBIN%\Microsoft.Dynamics.Nav.!COP!.dll" (
+        set "ANALYZERARGS=!ANALYZERARGS! /analyzer:"%ALBIN%\Microsoft.Dynamics.Nav.!COP!.dll""
+      ) else if exist "%ALBIN%\..\Analyzers\Microsoft.Dynamics.Nav.!COP!.dll" (
         set "ANALYZERARGS=!ANALYZERARGS! /analyzer:"%ALBIN%\..\Analyzers\Microsoft.Dynamics.Nav.!COP!.dll""
       ) else (
         echo [al-build] Warning: analyzer "!COP!" not found - skipped. 1>&2
@@ -64,7 +66,13 @@ if defined OUTAPP set "OUTARG=/out:"%OUTAPP%""
 echo [al-build] alc.exe from "%ALBIN%"
 set "ALLOG=%TEMP%\al-build-%RANDOM%%RANDOM%.log"
 "%ALBIN%\alc.exe" /project:"%PROJECT%" %PKGARG% %OUTARG%%ANALYZERARGS% > "%ALLOG%" 2>&1
+set "ALCOMPILEREXIT=%ERRORLEVEL%"
 type "%ALLOG%"
+if not "%ALCOMPILEREXIT%"=="0" (
+  del "%ALLOG%" >nul 2>&1
+  echo [al-build] BUILD FAILED - compiler exited with %ALCOMPILEREXIT%. 1>&2
+  exit /b 1
+)
 
 rem alc.exe exits 0 even when compilation fails, so grade the output ourselves.
 findstr /r /c:"error [A-Z][A-Z]*[0-9][0-9]*:" "%ALLOG%" >nul

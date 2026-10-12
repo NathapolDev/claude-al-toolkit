@@ -1,0 +1,12 @@
+{
+  "name": "codex-al-toolkit",
+  "interface": { "displayName": "Codex AL Toolkit" },
+  "plugins": [
+    {
+      "name": "al-toolkit",
+      "source": { "source": "local", "path": "./plugins/al-toolkit" },
+      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+      "category": "Developer Tools"
+    }
+  ]
+}

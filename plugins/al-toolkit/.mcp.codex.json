@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "al": {
+      "command": "cmd.exe",
+      "args": ["/d", "/c", "scripts\\al-mcp.cmd", "--defer-project"],
+      "cwd": ".",
+      "env_vars": ["USERPROFILE", "LOCALAPPDATA", "ProgramFiles", "ProgramFiles(x86)", "AL_BIN", "AL_EXTENSIONS_DIR", "VSCODE_EXTENSIONS", "AL_PROJECT_DIR"],
+      "startup_timeout_sec": 60,
+      "tool_timeout_sec": 120
+    }
+  }
+}

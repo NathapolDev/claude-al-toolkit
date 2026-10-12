@@ -19,9 +19,13 @@ if not defined ALBIN (
   exit /b 1
 )
 
-rem altool requires at least one project path; default to the directory Claude
-rem Code was started in (the current AL project).
+rem Codex launches from the installed plugin root. Defer workspace selection to
+rem al_addproject unless AL_PROJECT_DIR is explicitly configured.
 set "ALPROJECT=%AL_PROJECT_DIR%"
-if not defined ALPROJECT set "ALPROJECT=%CD%"
+if not defined ALPROJECT if /i not "%~1"=="--defer-project" set "ALPROJECT=%CD%"
+if not defined ALPROJECT (
+  "%ALBIN%\altool.exe" launchmcpserver --transport stdio
+  exit /b
+)
 
 "%ALBIN%\altool.exe" launchmcpserver --transport stdio "%ALPROJECT%"

@@ -6,6 +6,16 @@ description: >-
 
 # AL Implementation (al-developer)
 
+## Installed paths and workspace
+All relative paths below resolve from the directory containing this `SKILL.md`,
+not from the user's working directory. Resolve them to absolute paths before reading
+references or invoking scripts; quote paths in shell commands.
+Use the connected AL MCP tools automatically. Before project operations, call `al_addproject`
+with the intended folder containing `app.json` to load it into the workspace.
+Pass its absolute `projectPath` to subsequent tools,
+especially when multiple projects are loaded. Never use the installed plugin as the AL
+project. If a named tool is unavailable, report that limitation instead of inventing it.
+
 Act as a Senior AL Developer for Business Central. Take the analysis (from the
 al-analyst skill, if available) and write real, working code. You must (1) verify the
 requirement is technically feasible, (2) select the best practical approach, and (3)
@@ -13,7 +23,7 @@ ensure the code compiles cleanly with zero diagnostics before declaring done.
 
 Follow the official Microsoft AL guidelines and
 https://alguidelines.dev/docs/bestpractices/ (including the "Vibe Coding Rules for AL").
-Full house rules: `${CLAUDE_PLUGIN_ROOT}/references/al-rules.md` (canonical
+Full house rules: `../../references/al-rules.md` (canonical
 — read it when in doubt instead of guessing).
 
 ## Workflow
@@ -36,24 +46,22 @@ Full house rules: `${CLAUDE_PLUGIN_ROOT}/references/al-rules.md` (canonical
 7. Summarize what changed, key decisions, and build results; recommend an al-reviewer pass.
 
 ## Build tooling — never guess compile results
-**Primary — AL MCP server (`al` MCP, when connected):** tools are deferred; load them
-first with ToolSearch (`select:al_compile,al_getdiagnostics,al_downloadsymbols,al_symbolsearch`).
+**Primary — AL MCP server (`al` MCP, when connected):** use the available `al_compile`, `al_getdiagnostics`, `al_downloadsymbols`, and `al_symbolsearch` tools. Discover deferred tools through the host tool-search facility when available.
 Then: `al_downloadsymbols` (if symbols missing/stale) → `al_compile` (fast, no .app;
 set `enableCodeAnalysis: true` with `codeAnalyzers` = `${CodeCop}` + `${PerTenantExtensionCop}`
 for PTE or `${AppSourceCop}` for AppSource, per app.json `target`) → `al_getdiagnostics`
 → fix → repeat until clean. Use `al_build` only when a `.app` file is needed.
 
 **Fallback — if the `al` MCP server is not connected:** build with the bundled script
-`${CLAUDE_PLUGIN_ROOT}/scripts/al-build.cmd "<projectDir>"` (alc.exe; ships with this
-plugin, so it works on every machine). It resolves the AL toolchain itself, prints the
+`../../scripts/al-build.cmd "<projectDir>"` (alc.exe; ships with this
+plugin, so it works on Windows machines with the AL Language extension). It resolves the AL toolchain itself, prints the
 compiler diagnostics, and exits non-zero on failure — read the errors from its output and
 fix until it prints `BUILD OK`. Run code analysis by setting `AL_ANALYZERS` first
 (`CodeCop;PerTenantExtensionCop` for PTE, `CodeCop;AppSourceCop` for AppSource, per
 app.json `target`). If the user has the separate **al-compiler** skill installed, that
-works too. Note: the `al` MCP server is registered by this plugin's `.mcp.json` and
+works too. Note: the `al` MCP server is registered by this plugin's `.mcp.codex.json` in Codex (`.mcp.json` in Claude Code) and
 requires the AL Language VS Code extension (`ms-dynamics-smb.al-*`) installed on the
-machine, plus Claude Code started from the AL project folder; if `al_*` tools are
-missing, tell the user to check `claude mcp list`.
+machine, plus an AL project loaded with `al_addproject`; if `al_*` tools are missing, check the installed plugin and MCP connection in the host.
 
 Either way: if you cannot run a real build, do NOT report the task as done — say so.
 
@@ -75,7 +83,7 @@ Either way: if you cannot run a real build, do NOT report the task as done — s
 - **New page fields/actions:** `ApplicationArea`, `Caption`, and `ToolTip` on every
   user-visible control.
 - **Permissions:** add every new object to the app's permission set object (or create one
-  — see the `bc365-permissionset` skill); a feature nobody can run isn't done.
+  — follow the project's permission set conventions); a feature nobody can run isn't done.
 - **External calls:** wrap in `[TryFunction]` with proper error handling; never leak raw
   HTTP errors to users.
 - **Upgrade code:** triggers delegate only; guard every Get/Find; always use Upgrade Tags
@@ -120,7 +128,7 @@ Either way: if you cannot run a real build, do NOT report the task as done — s
 - When implementation is ready, recommend reviewing it with the **al-reviewer** skill.
 
 ## Reference
-- Canonical house rules: `${CLAUDE_PLUGIN_ROOT}/references/al-rules.md`
+- Canonical house rules: `../../references/al-rules.md`
 - AL Best Practices: https://alguidelines.dev/docs/bestpractices/
 - Design Patterns: https://alguidelines.dev/docs/patterns/
 - Vibe Coding Rules for AL: https://alguidelines.dev/docs/agentic-coding/vibe-coding-rules/
