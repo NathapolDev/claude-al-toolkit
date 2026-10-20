@@ -35,7 +35,7 @@
 - Calculate changes first and write once when practical.
 - Avoid unnecessary `Commit()` calls.
 - Verify a field's `FieldClass` before reading it dynamically. For FlowFields, call `CalcFields` before using or assigning the value.
-- A new field that must flow to another table via `TransferFields` (e.g. Sales Header → Sales Invoice Header, Sales Line → Sales Invoice Line) must exist in every target table extension with the **same field ID, same name, and same data type/length**. `TransferFields` matches by field ID only and copies nothing (or errors at runtime) on a type mismatch; the runtime tolerates only Text↔Code and enum↔enum (copied by ordinal — still require the same enum), and the target length must fit the source value.
+- A new field that must flow to another table via `TransferFields` (e.g. Sales Header → Sales Invoice Header, Sales Line → Sales Invoice Line) must exist in every target table extension with the **same field ID, same name, and same data type/length**. `TransferFields` matches by field ID only: a type mismatch errors at runtime (same extension) or is skipped silently (cross-extension), and a same-ID field with a different name receives the wrong data silently; the runtime tolerates only Text↔Code and enum↔enum (copied by ordinal — still require the same enum), and the target length must fit the source value.
 
 ## Error Handling
 

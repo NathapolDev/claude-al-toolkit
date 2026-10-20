@@ -32,17 +32,24 @@ Two invariants hold the distribution together:
    `SKILL.md` files reference the plugin root variable, never an absolute or
    user-specific path. Introducing a machine-specific path breaks installs elsewhere —
    this is the single most common way to regress this repo.
-2. **The AL toolchain is never bundled.** `altool.exe` / `alc.exe` belong to Microsoft's
-   AL Language VS Code extension (`ms-dynamics-smb.al-*`), resolved at *launch time*, not
-   install time, so extension auto-updates cannot break a registered command.
+2. **The AL toolchain is never bundled.** `altool.exe` / `alc.exe` come from Microsoft's
+   AL Development Tools .NET global tool (`Microsoft.Dynamics.BusinessCentral.Development.Tools`,
+   no VS Code needed) or the AL Language VS Code extension (`ms-dynamics-smb.al-*`),
+   resolved at *launch time*, not install time, so updates cannot break a registered command.
 
 ### Path resolution (`find-al-bin.cmd`)
 
 Both runnable scripts delegate discovery to `find-al-bin.cmd <exeName>`, which prints the
-resolved `bin\win32` folder to stdout (exit 0) or a diagnostic to stderr (exit 1). Callers
-capture it with `for /f`. Search order: `%AL_BIN%` → `%AL_EXTENSIONS_DIR%` →
-`%VSCODE_EXTENSIONS%` → VS Code stable/Insiders/Server/OSS user roots → portable and
-Program Files installs; newest `ms-dynamics-smb.al-*` folder wins within a root.
+resolved bin folder to stdout (exit 0) or a diagnostic to stderr (exit 1). Callers
+capture it with `for /f`. Search order: `%AL_BIN%` → `%AL_EXTENSIONS_DIR%` → .NET global
+tool store (`%USERPROFILE%\.dotnet\tools\.store\...\tools\net10.0|net8.0\any`, only the
+TFM whose ASP.NET Core runtime is installed) → `%VSCODE_EXTENSIONS%` → VS Code
+stable/Insiders/Server/OSS user roots → portable and Program Files installs; newest
+`ms-dynamics-smb.al-*` folder wins within a root, accepting `bin\` (AL 18+) or
+`bin\win32` (older).
+
+Batch gotcha: piping from a command that isn't on PATH inside a `call`ed block aborts the
+whole script (exit 255) — the resolver guards with `where dotnet` before piping.
 
 Add new machine layouts to the candidate list in that one script — do not add lookup
 logic to `al-mcp.cmd` or `al-build.cmd`.
@@ -50,7 +57,8 @@ logic to `al-mcp.cmd` or `al-build.cmd`.
 Environment overrides: `AL_BIN`, `AL_EXTENSIONS_DIR`, `AL_PROJECT_DIR` (project handed to
 the MCP server, default `%CD%`), `AL_PACKAGECACHE` (default `<project>\.alpackages`),
 `AL_ANALYZERS` (semicolon list of cop names, mapped to
-`bin\Analyzers\Microsoft.Dynamics.Nav.<Cop>.dll`).
+`Microsoft.Dynamics.Nav.<Cop>.dll` next to `alc.exe`, else `..\Analyzers\` for the
+legacy `bin\win32` layout).
 
 ### `alc.exe` always exits 0
 
@@ -86,7 +94,8 @@ There is no test runner. Verify by exercising the scripts directly (PowerShell 7
 $s = "plugins\al-toolkit\scripts"
 
 # resolver: happy path, override, and failure path
-cmd /c "$s\find-al-bin.cmd altool.exe"          # -> ...\bin\win32, exit 0
+cmd /c "$s\find-al-bin.cmd altool.exe"          # -> .NET tool or extension bin, exit 0
+cmd /c "set PATH=C:\Windows\system32&& $s\find-al-bin.cmd altool.exe"  # no dotnet -> extension
 cmd /c "$s\find-al-bin.cmd nope.exe"            # -> stderr guidance, exit 1
 $env:AL_BIN = "C:\bogus"; cmd /c "$s\find-al-bin.cmd alc.exe"   # warns, falls through
 
@@ -123,8 +132,8 @@ otherwise version-pinned installs won't pick them up. Consumers then run
 
 ## Constraints
 
-- **Windows-only by design** — launchers are `.cmd` and the AL extension ships
-  `altool.exe` / `alc.exe` under `bin/win32` only. Keep scripts as batch; PowerShell 7
+- **Windows-only by design** — launchers are `.cmd` and resolve `altool.exe` /
+  `alc.exe` Windows binaries. Keep scripts as batch; PowerShell 7
   (`pwsh`) is the preferred shell for *running* them, not for rewriting them.
 - Batch scripts use `setlocal enabledelayedexpansion` with `!VAR!` inside `for` bodies —
   preserve this when editing, `%VAR%` expands at parse time and silently misbehaves.

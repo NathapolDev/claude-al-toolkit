@@ -13,6 +13,7 @@ rem
 rem Optional overrides:
 rem   AL_BIN            - folder containing alc.exe
 rem   AL_EXTENSIONS_DIR - VS Code extensions root
+rem   (toolchain resolution: see find-al-bin.cmd - .NET tool or VS Code extension)
 rem   AL_PACKAGECACHE   - symbol folder (default: <projectDir>\.alpackages)
 rem   AL_ANALYZERS      - semicolon list of cops, e.g. CodeCop;PerTenantExtensionCop
 rem                       (valid: CodeCop, AppSourceCop, PerTenantExtensionCop, UICop)
@@ -43,14 +44,18 @@ if not exist "%PKGCACHE%\" (
 )
 set "PKGARG=/packagecachepath:"%PKGCACHE%""
 
-rem Map friendly cop names onto the analyzer DLLs shipped with the extension.
+rem Map friendly cop names onto the analyzer DLLs shipped with the toolchain:
+rem next to alc.exe (.NET tool, AL 18+ extension) or bin\Analyzers (older bin\win32).
 set "ANALYZERARGS="
 if defined AL_ANALYZERS (
   for %%A in ("%AL_ANALYZERS:;=" "%") do (
     set "COP=%%~A"
+    set "COPDLL="
     if not "!COP!"=="" (
-      if exist "%ALBIN%\..\Analyzers\Microsoft.Dynamics.Nav.!COP!.dll" (
-        set "ANALYZERARGS=!ANALYZERARGS! /analyzer:"%ALBIN%\..\Analyzers\Microsoft.Dynamics.Nav.!COP!.dll""
+      if exist "%ALBIN%\Microsoft.Dynamics.Nav.!COP!.dll" set "COPDLL=%ALBIN%\Microsoft.Dynamics.Nav.!COP!.dll"
+      if not defined COPDLL if exist "%ALBIN%\..\Analyzers\Microsoft.Dynamics.Nav.!COP!.dll" set "COPDLL=%ALBIN%\..\Analyzers\Microsoft.Dynamics.Nav.!COP!.dll"
+      if defined COPDLL (
+        set "ANALYZERARGS=!ANALYZERARGS! /analyzer:"!COPDLL!""
       ) else (
         echo [al-build] Warning: analyzer "!COP!" not found - skipped. 1>&2
       )

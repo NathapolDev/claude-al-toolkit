@@ -51,8 +51,9 @@ fix until it prints `BUILD OK`. Run code analysis by setting `AL_ANALYZERS` firs
 (`CodeCop;PerTenantExtensionCop` for PTE, `CodeCop;AppSourceCop` for AppSource, per
 app.json `target`). If the user has the separate **al-compiler** skill installed, that
 works too. Note: the `al` MCP server is registered by this plugin's `.mcp.json` and
-requires the AL Language VS Code extension (`ms-dynamics-smb.al-*`) installed on the
-machine, plus Claude Code started from the AL project folder; if `al_*` tools are
+requires an AL toolchain on the machine — the AL Development Tools .NET tool
+(`dotnet tool install -g Microsoft.Dynamics.BusinessCentral.Development.Tools`) or the AL
+Language VS Code extension (`ms-dynamics-smb.al-*`) — plus Claude Code started from the AL project folder; if `al_*` tools are
 missing, tell the user to check `claude mcp list`.
 
 Either way: if you cannot run a real build, do NOT report the task as done — say so.

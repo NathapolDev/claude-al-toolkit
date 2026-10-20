@@ -1,10 +1,10 @@
 @echo off
 setlocal
 rem ---------------------------------------------------------------------------
-rem Launches the AL MCP server from the installed AL Language extension.
-rem Path resolution is delegated to find-al-bin.cmd, which searches several
-rem VS Code extension roots and honours the AL_BIN / AL_EXTENSIONS_DIR
-rem overrides - so this works on machines with non-default VS Code layouts.
+rem Launches the AL MCP server (altool launchmcpserver) from the AL Development
+rem Tools .NET global tool or the AL Language VS Code extension. Path
+rem resolution is delegated to find-al-bin.cmd, which honours the AL_BIN /
+rem AL_EXTENSIONS_DIR overrides - so this works with or without VS Code.
 rem
 rem Optional overrides:
 rem   AL_BIN            - folder containing altool.exe

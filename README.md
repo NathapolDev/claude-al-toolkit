@@ -7,7 +7,7 @@ at every stage that produces code.
 
 | Component | What it does |
 |---|---|
-| **`al` MCP server** | Launches the AL Language VS Code extension's built-in MCP server (`altool.exe launchmcpserver`). Gives Claude `al_compile`, `al_getdiagnostics`, `al_symbolsearch`, `al_downloadsymbols`, `al_build`, `al_publish`, `al_run_tests`. Resolves the newest installed `ms-dynamics-smb.al-*` extension at every launch, so VS Code auto-updates never break it. |
+| **`al` MCP server** | Launches Microsoft's AL MCP server (`altool.exe launchmcpserver`) from the standalone AL Development Tools .NET tool or the AL Language VS Code extension. Gives Claude `al_compile`, `al_getdiagnostics`, `al_symbolsearch`, `al_downloadsymbols`, `al_build`, `al_publish`, `al_run_tests`. Resolves the toolchain at every launch, so tool/extension updates never break it. |
 | **`al-build.cmd`** | Bundled `alc.exe` build fallback, used when the MCP server isn't connected — so every machine has a real build path. |
 | **`al-analyst`** skill | Analyze a requirement → Solution Design comparing options. Read-only, writes no code. |
 | **`al-developer`** skill | Implement AL code, build until zero diagnostics. |
@@ -21,30 +21,35 @@ at every stage that produces code.
 The AL toolchain is **not** shipped inside this plugin — `altool.exe` and `alc.exe` are
 Microsoft's binaries. Each machine needs:
 
-- **Windows.** The launchers are `.cmd`, and the AL extension ships Windows binaries under
-  `bin/win32` only.
-- **VS Code** with the **AL Language** extension (`ms-dynamics-smb.al-*`, normally under
-  `%USERPROFILE%\.vscode\extensions`).
+- **Windows.** The launchers are `.cmd`.
+- **One AL toolchain** — either works; the .NET tool needs no VS Code:
+  - **AL Development Tools .NET tool** (recommended):
+    `dotnet tool install -g Microsoft.Dynamics.BusinessCentral.Development.Tools`
+    (add `--prerelease` for the newest beta). Needs the .NET 10 **or** .NET 8 ASP.NET Core
+    runtime; the resolver picks the build whose runtime is installed.
+  - **VS Code** with the **AL Language** extension (`ms-dynamics-smb.al-*`, normally under
+    `%USERPROFILE%\.vscode\extensions`; binaries in `bin\` on AL 18+, `bin\win32` before).
 - **Claude Code**, started from inside the AL project folder — `altool` needs a project
   path to resolve symbols against.
 
-Without the AL extension, neither the `al` MCP server nor `al-build.cmd` can run. The
+Without either toolchain, neither the `al` MCP server nor `al-build.cmd` can run. The
 three skills still work, but they will report the build as **NOT VERIFIED** rather than
 assume the code compiles.
 
 ### Non-default VS Code locations
 
 Both scripts resolve the toolchain through `scripts/find-al-bin.cmd`, which searches in
-order: `%AL_BIN%` → `%AL_EXTENSIONS_DIR%` → `%VSCODE_EXTENSIONS%` → VS Code stable /
-Insiders / Server / OSS user extension roots → portable and Program Files installs. Within
-a root, the newest `ms-dynamics-smb.al-*` folder wins.
+order: `%AL_BIN%` → `%AL_EXTENSIONS_DIR%` → AL Development Tools .NET global tool →
+`%VSCODE_EXTENSIONS%` → VS Code stable / Insiders / Server / OSS user extension roots →
+portable and Program Files installs. Within a root, the newest `ms-dynamics-smb.al-*`
+folder wins.
 
 If a machine keeps extensions somewhere unusual, set one environment variable — no script
 edits needed:
 
 ```powershell
 # point straight at the folder holding altool.exe / alc.exe
-setx AL_BIN "D:\tools\al\bin\win32"
+setx AL_BIN "D:\tools\al\bin"
 
 # or point at the extensions root and let the script pick the newest AL version
 setx AL_EXTENSIONS_DIR "D:\vscode-extensions"

@@ -30,8 +30,8 @@ https://alguidelines.dev/docs/bestpractices/, and the canonical house rules in
      `CodeCop;PerTenantExtensionCop`) to include cop findings. The separate **al-compiler**
      skill works too if installed. If `al_*` tools are missing, tell the user to check
      `claude mcp list` (the `al` MCP server is registered by this plugin's `.mcp.json` and
-     needs Claude Code started in the project folder, plus the AL Language VS Code
-     extension installed on the machine).
+     needs Claude Code started in the project folder, plus an AL toolchain on the machine:
+     the AL Development Tools .NET tool or the AL Language VS Code extension).
    - If you cannot run any real build, say so explicitly and mark the build check as
      NOT VERIFIED — never assume it compiles.
 5. Check tests — **only if tests were requested or already exist**: review coverage of
@@ -65,15 +65,25 @@ https://alguidelines.dev/docs/bestpractices/, and the canonical house rules in
   Caption; FlowFields read only after CalcFields; page fields/actions have
   ApplicationArea, Caption, and ToolTip; every new object is covered by a permission set
   (see the `bc365-permissionset` skill).
-  For every new field, check whether its table's records are copied with `TransferFields`
-  (posting, archiving, copy-document flows). If so, the same field must exist in each target
-  table/extension with the **same ID, name, and data type (incl. length)** — a missing or
-  mismatched field is 🟠 Major.
 - **H. Upgrade safety** — schema changes to existing data have upgrade code using Upgrade
   Tags (delegating triggers, guarded Get/Find); deprecation uses Obsolete
   (State/Reason/Tag) + preprocessor symbols; no unintended breaking change to
   public/business events.
-- **I. Build & test** — build verified by you (al_compile / al-build.cmd) with 0
+- **I. TransferFields field mapping** — for every new/changed table field, find where its
+  record flows to another table via `TransferFields` (this app's code: grep
+  `TransferFields`; base-app posting/archiving/copy-document flows, e.g. Item Journal
+  Line → posted tables, Sales/Purchase Header/Line → posted document tables, both extended
+  by this app). `TransferFields` maps by **field ID only**. For each source/target pair,
+  compare all of this app's fields (table + tableextensions) side by side by ID:
+  - Same ID → **name and data type (incl. length) must match** on both sides.
+  - Mismatched type → runtime error "fields must have the same type" (only when both
+    fields come from the same extension; across extensions the field is skipped silently).
+  - Same ID/type but different name → wrong data copied silently.
+  - Field that should flow but has no counterpart with the same ID → data silently dropped.
+  - Any of these = **🟠 Major**. Report a table of ID | source name/type | target
+    name/type | result. Fix by aligning IDs/types (mind upgrade impact on tables that
+    already hold data); `TransferFields(From, true, true)` only as a stopgap.
+- **J. Build & test** — build verified by you (al_compile / al-build.cmd) with 0
   errors; remaining warnings justified; if tests were requested/exist, they cover the new
   public API/behavior.
 
@@ -81,7 +91,7 @@ https://alguidelines.dev/docs/bestpractices/, and the canonical house rules in
 - 🔴 Blocker — compliance/security, compile error, missing requirement → must fix
 - 🟠 Major — architectural violation, low-quality events, upgrade risk, missing
   DataClassification/permission coverage, `TransferFields` target field missing or
-  ID/name/type mismatch → fix before merge
+  ID/name/type mismatch (checklist I) → fix before merge
 - 🟡 Minor — naming, formatting, readability, missing ToolTip → fix/note
 - 🟢 Suggestion — optional improvement, test gaps (when tests weren't requested)
 
