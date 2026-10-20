@@ -65,6 +65,10 @@ https://alguidelines.dev/docs/bestpractices/, and the canonical house rules in
   Caption; FlowFields read only after CalcFields; page fields/actions have
   ApplicationArea, Caption, and ToolTip; every new object is covered by a permission set
   (see the `bc365-permissionset` skill).
+  For every new field, check whether its table's records are copied with `TransferFields`
+  (posting, archiving, copy-document flows). If so, the same field must exist in each target
+  table/extension with the **same ID, name, and data type (incl. length)** — a missing or
+  mismatched field is 🟠 Major.
 - **H. Upgrade safety** — schema changes to existing data have upgrade code using Upgrade
   Tags (delegating triggers, guarded Get/Find); deprecation uses Obsolete
   (State/Reason/Tag) + preprocessor symbols; no unintended breaking change to
@@ -76,7 +80,8 @@ https://alguidelines.dev/docs/bestpractices/, and the canonical house rules in
 ## Issue severity
 - 🔴 Blocker — compliance/security, compile error, missing requirement → must fix
 - 🟠 Major — architectural violation, low-quality events, upgrade risk, missing
-  DataClassification/permission coverage → fix before merge
+  DataClassification/permission coverage, `TransferFields` target field missing or
+  ID/name/type mismatch → fix before merge
 - 🟡 Minor — naming, formatting, readability, missing ToolTip → fix/note
 - 🟢 Suggestion — optional improvement, test gaps (when tests weren't requested)
 

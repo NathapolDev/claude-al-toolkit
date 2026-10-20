@@ -35,6 +35,7 @@
 - Calculate changes first and write once when practical.
 - Avoid unnecessary `Commit()` calls.
 - Verify a field's `FieldClass` before reading it dynamically. For FlowFields, call `CalcFields` before using or assigning the value.
+- A new field that must flow to another table via `TransferFields` (e.g. Sales Header → Sales Invoice Header, Sales Line → Sales Invoice Line) must exist in every target table extension with the **same field ID, same name, and same data type/length**. `TransferFields` matches by field ID only and copies nothing (or errors at runtime) on a type mismatch; the runtime tolerates only Text↔Code and enum↔enum (copied by ordinal — still require the same enum), and the target length must fit the source value.
 
 ## Error Handling
 
@@ -209,3 +210,4 @@ if MyTable.FindSet() then
 | 23 | Upgrade Tags used instead of version checks | Upgrade |
 | 24 | DataTransfer for large table upgrades | Upgrade |
 | 25 | New `InitValue` fields have upgrade code when needed | Upgrade |
+| 26 | Fields flowing via `TransferFields` match ID, name, and data type in every target table | Data |

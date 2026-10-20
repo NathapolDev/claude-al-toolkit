@@ -39,6 +39,10 @@ For the full house coding rules, see
    - **Permission sets** — new objects need permission set coverage; point to the
      `bc365-permissionset` skill for creation/analysis.
    - **Upgrade** — schema changes to existing data need upgrade code with Upgrade Tags.
+   - **TransferFields flow** — for each new field, find whether its table is copied to
+     other tables with `TransferFields` (posting, archiving, copy-document; verify with
+     `al_symbolsearch` / MS Learn). List every target table; the field must be added to
+     each with the same ID, name, and data type/length.
 6. **Deliver** the analysis in the format below.
 
 ## Decision framework (prefer least base-app impact that meets the requirement)
@@ -79,6 +83,7 @@ For the full house coding rules, see
 ## 5. Recommended Approach
 - Chosen option + why; proposed object structure (name + prefix + type + ID within
   idRanges); where to subscribe/extend
+- New fields that flow via `TransferFields`: | Field | ID | Type/Length | Source table | Target tables |
 ## 6. Risks / Assumptions / Open Questions
 - Include DataClassification, permission set impact, upgrade-code needs
 ## 7. Handoff
