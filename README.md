@@ -36,6 +36,31 @@ Without either toolchain, neither the `al` MCP server nor `al-build.cmd` can run
 three skills still work, but they will report the build as **NOT VERIFIED** rather than
 assume the code compiles.
 
+### Toolchain benchmark
+
+Measured 2026-10-20 through this plugin's `al-mcp.cmd` on one Windows 11 machine, against
+a real PTE project (281 `.al` files, 45 symbol packages). Times are wall-clock per MCP
+call; your numbers will vary with hardware and project size.
+
+| Operation | .NET tool 30.0.43 (beta, net10.0) | VS Code AL extension 18.1 |
+|---|---|---|
+| Server start (`initialize`) | ~1 s | ~1 s |
+| First `al_compile` (loads symbols) | 10–13 s | 10–14 s |
+| `al_compile` after editing a file | 0.3–0.9 s | 0.3–0.9 s |
+| `al_compile` + CodeCop + PerTenantExtensionCop | ~4.6 s | ~3.9 s |
+| `al_symbolsearch` (`Sales Header`, Table) | **~1.7 s** | **~33 s** |
+| `al-build.cmd` (alc.exe, both cops, writes `.app`) | ~13.5 s | — |
+
+Correctness was identical on both: 0 errors on the clean project (matching
+`al-build.cmd`), the same CodeCop / PTE cop diagnostic codes, and 24/24 edit cycles where
+an injected `AL0132` error was reported at the right line/column and cleared immediately
+after the fix — no file-watcher delay.
+
+Takeaways: expect ~10 s once per session, then sub-second incremental compiles. The .NET
+tool is much faster for symbol search, which `al-analyst` leans on. `al_compile` returns at
+most 100 diagnostics by default, so use `onlyErrors: true` to grade a build and
+`al_getdiagnostics` to page through warnings.
+
 ### Non-default VS Code locations
 
 Both scripts resolve the toolchain through `scripts/find-al-bin.cmd`, which searches in
