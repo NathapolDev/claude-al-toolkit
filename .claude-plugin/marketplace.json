@@ -5,10 +5,10 @@
     "name": "Nathapol",
     "email": "nathapoj@gmail.com"
   },
-  "description": "Internal marketplace distributing the al-toolkit plugin (AL MCP server + al-analyst/al-developer/al-reviewer skills) for Business Central AL development.",
+  "description": "Internal marketplace distributing the bc365-al-toolkit plugin (AL MCP server + al-analyst/al-developer/al-reviewer skills) for Business Central AL development.",
   "plugins": [
     {
-      "name": "al-toolkit",
+      "name": "bc365-al-toolkit",
       "source": "./plugins/al-toolkit",
       "description": "AL Language MCP server plus the al-analyst / al-developer / al-reviewer skill pipeline for Business Central AL development."
     }

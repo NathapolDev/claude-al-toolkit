@@ -1,4 +1,4 @@
-# al-toolkit
+# bc365-al-toolkit
 
 Business Central AL development tooling for Claude Code. The plugin registers the
 Microsoft AL Language MCP server (`al`) and adds a three-stage skill pipeline:
@@ -24,7 +24,7 @@ the official Microsoft AL guidelines and alguidelines.dev.
 ## Install
 
 ```
-/plugin install al-toolkit@<marketplace>
+/plugin install bc365-al-toolkit@<marketplace>
 /reload-plugins
 ```
 

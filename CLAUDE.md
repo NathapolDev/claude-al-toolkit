@@ -111,7 +111,7 @@ Full install check (do this before distributing):
 
 ```
 /plugin marketplace add "C:\BPC BC Project\claude-al-toolkit"
-/plugin install al-toolkit@al-toolkit-marketplace
+/plugin install bc365-al-toolkit@al-toolkit-marketplace
 /reload-plugins
 ```
 
@@ -121,14 +121,14 @@ project folder — `altool` needs a project path to resolve symbols against.
 ## Distribution
 
 Consumers install via `/plugin marketplace add <git-url | local path | UNC share>` then
-`/plugin install al-toolkit@al-toolkit-marketplace`. Installed skills are namespaced
-(`/al-toolkit:al-analyst`, etc.) and also auto-trigger from natural language via each
+`/plugin install bc365-al-toolkit@al-toolkit-marketplace`. Installed skills are namespaced
+(`/bc365-al-toolkit:al-analyst`, etc.) and also auto-trigger from natural language via each
 `SKILL.md` frontmatter `description`.
 
 Bump `version` in `plugins/al-toolkit/.claude-plugin/plugin.json` when shipping changes,
 otherwise version-pinned installs won't pick them up. Consumers then run
 `/plugin marketplace update al-toolkit-marketplace` and
-`/plugin update al-toolkit@al-toolkit-marketplace`.
+`/plugin update bc365-al-toolkit@al-toolkit-marketplace`.
 
 ## Constraints
 

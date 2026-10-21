@@ -1,4 +1,4 @@
-# al-toolkit
+# bc365-al-toolkit
 
 A Claude Code plugin marketplace for Microsoft Dynamics 365 Business Central AL
 development. It gives Claude Code a real AL toolchain plus a three-stage skill pipeline
@@ -99,7 +99,7 @@ setx AL_EXTENSIONS_DIR "D:\vscode-extensions"
 
 ```
 /plugin marketplace add <git-url-or-owner/repo>
-/plugin install al-toolkit@al-toolkit-marketplace
+/plugin install bc365-al-toolkit@al-toolkit-marketplace
 /reload-plugins
 ```
 
@@ -110,7 +110,7 @@ then:
 
 ```
 /plugin marketplace add "\\server\share\claude-al-toolkit"
-/plugin install al-toolkit@al-toolkit-marketplace
+/plugin install bc365-al-toolkit@al-toolkit-marketplace
 /reload-plugins
 ```
 
@@ -126,7 +126,7 @@ A local path also works for testing before distributing:
 claude mcp list          # must list `al`
 ```
 
-Then in Claude Code, `/al-toolkit:al-analyst` should appear. If `al_*` tools are missing,
+Then in Claude Code, `/bc365-al-toolkit:al-analyst` should appear. If `al_*` tools are missing,
 check that the AL Language extension is installed and that Claude Code was started from
 the AL project folder.
 
@@ -144,7 +144,7 @@ requirement ──▶ al-analyst ──▶ Solution Design ──▶ al-develope
 
 Invoke a skill in either way:
 
-- **Explicitly** — `/al-toolkit:al-analyst <your requirement>`
+- **Explicitly** — `/bc365-al-toolkit:al-analyst <your requirement>`
 - **Implicitly** — just describe the task. Each skill's frontmatter `description` makes
   Claude pick the right one from natural language, in Thai or English.
 
@@ -157,7 +157,7 @@ Skip stages when it makes sense: a one-line fix doesn't need an analysis pass. B
 implement X", "analyze this requirement", "what's the best way to add Y".
 
 ```
-/al-toolkit:al-analyst Add an approval workflow to the Purchase Order card so orders
+/bc365-al-toolkit:al-analyst Add an approval workflow to the Purchase Order card so orders
 above 100,000 THB need a manager's approval before release.
 ```
 
@@ -185,7 +185,7 @@ ambiguous it asks specific questions first.
 this field", "fix this AL error".
 
 ```
-/al-toolkit:al-developer Implement the recommended Option B from the analysis above.
+/bc365-al-toolkit:al-developer Implement the recommended Option B from the analysis above.
 ```
 
 **What it does:** verifies feasibility **before** writing — confirms objects, fields,
@@ -211,7 +211,7 @@ confirmed), test gaps, and focus areas for review.
 before I merge", "is this codeunit safe".
 
 ```
-/al-toolkit:al-reviewer Review the changes in src/PurchaseApproval/.
+/bc365-al-toolkit:al-reviewer Review the changes in src/PurchaseApproval/.
 ```
 
 **What it does:** checks requirement coverage, reads the changed code against a nine-part
@@ -268,7 +268,7 @@ After changing skills or rules here:
 
 ```
 /plugin marketplace update al-toolkit-marketplace
-/plugin update al-toolkit@al-toolkit-marketplace
+/plugin update bc365-al-toolkit@al-toolkit-marketplace
 ```
 
 ---
