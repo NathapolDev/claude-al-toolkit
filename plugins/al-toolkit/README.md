@@ -46,7 +46,7 @@ The plugin itself contains only Markdown skills, JSON manifests, and three reada
 batch scripts. It does not download anything, contact any server itself, or collect
 telemetry, and it doesn't change Claude's permission settings.
 
-- **MCP server launch** (`scripts/al-mcp.cmd`, started via `cmd /c`): finds
+- **MCP server launch** (`scripts/al-mcp.cmd`): finds
   `altool.exe` with `scripts/find-al-bin.cmd`, then runs
   `altool.exe launchmcpserver --transport stdio <project>`. The `al` server is
   Microsoft's software. Its tools run on your machine, with your credentials.
