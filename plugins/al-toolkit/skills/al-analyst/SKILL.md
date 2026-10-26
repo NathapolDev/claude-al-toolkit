@@ -13,7 +13,26 @@ an Analysis / Solution Design that the al-developer skill can implement directly
 Ground every decision in the official Microsoft AL guidelines and
 https://alguidelines.dev/docs/bestpractices/ and https://alguidelines.dev/docs/patterns/.
 For the full house coding rules, see
-`${CLAUDE_PLUGIN_ROOT}/references/al-rules.md` (canonical).
+`../../references/al-rules.md` (canonical).
+
+## Host integration
+Resolve `../../references/al-rules.md` and `../../scripts/al-build.cmd` from this
+installed `SKILL.md` directory, then use their absolute paths when reading/running
+files. These paths are not relative to the AL project or shell working directory.
+Before analysis, follow `../../references/project-session.md` to select the AL project,
+set `AL_PROJECT_DIR`, and call `al_addproject` before any project-bound AL tool.
+Follow user instructions and the target project's `AGENTS.md` before bundled rules.
+Discover connected `al` MCP tools through the host tool catalog; Codex may expose
+names with an MCP prefix. Use ToolSearch only on hosts that provide it.
+Microsoft Learn MCP and other named skills are optional: if unavailable, use official
+Microsoft documentation and perform the needed permission-set work directly.
+
+Search workspace source first. For symbols outside the workspace, inspect
+`al_getpackagedependencies` when the app/version matters, then use narrow
+`al_symbolsearch` filters with `scope = dependencies`. Validate each result's path
+and app identity; report the confirmed signature and app/version when material.
+Symbol metadata does not expose dependency procedure bodies. Mark unobservable
+posting/copy/validation control flow as unverified rather than asserting it.
 
 ## Workflow
 1. **Understand the requirement** — restate the business + functional intent; identify
@@ -24,7 +43,7 @@ For the full house coding rules, see
    rules incl. affix), and platform/runtime version (limits available AL features).
 3. **Find extension points** — available IntegrationEvent / BusinessEvent publishers,
    interfaces, extensible enums. Verify they actually exist:
-   - `al_symbolsearch` (AL MCP, when connected — load via ToolSearch) to search events,
+   - `al_symbolsearch` (AL MCP, when connected — discover through the host tool catalog) to search events,
      objects, and fields across the project and its dependencies.
    - Microsoft Learn MCP (`microsoft_docs_search` / `microsoft_docs_fetch`) to confirm
      base-app events, APIs, and platform behavior.
@@ -98,6 +117,12 @@ For the full house coding rules, see
   **al-developer** skill.
 
 ## Reference
-- Canonical house rules: `${CLAUDE_PLUGIN_ROOT}/references/al-rules.md`
+- Canonical house rules: `../../references/al-rules.md`
 - AL Best Practices: https://alguidelines.dev/docs/bestpractices/
 - Design Patterns: https://alguidelines.dev/docs/patterns/
+
+## Environment operations
+Use `al_auth_login`, `al_auth_logout`, and `al_publish` only for an explicit deployment
+request. Production publishing requires an explicitly named target and confirmation.
+Run `al_run_tests` only for explicitly selected tests in a non-production environment.
+Download symbols only when missing/stale or required by diagnostics.

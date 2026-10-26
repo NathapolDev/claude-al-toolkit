@@ -1,72 +1,56 @@
-# bc365-al-toolkit
+# BC365 AL Toolkit
 
-Business Central AL development tooling for Claude Code. The plugin registers the
-Microsoft AL Language MCP server (`al`) and adds a three-stage skill pipeline:
+Business Central AL tooling for Codex and Claude Code: `al-analyst` (read-only
+design), `al-developer` (implementation and compiler verification), and `al-reviewer`
+(read-only review with independent diagnostics). Shared defaults live in
+`references/al-rules.md`; user instructions and the project's AGENTS.md take precedence.
 
-- **al-analyst** — turns a BC365 requirement into a Solution Design (read-only, no code).
-- **al-developer** — implements the design in AL and builds until there are zero errors.
-- **al-reviewer** — re-runs the build independently and returns Approve or Request Changes (read-only).
+## Installation
 
-All three skills follow the house rules in `references/al-rules.md`, which is based on
-the official Microsoft AL guidelines and alguidelines.dev.
+Requires Windows, a local executor, and Microsoft's AL Development Tools .NET
+global tool or AL Language VS Code extension. Microsoft binaries are not bundled.
 
-## Requirements
+**Codex CLI 0.164.0:**
 
-- **Windows only.** The launchers are `.cmd` scripts that run Windows binaries.
-- **Claude Code** (CLI or desktop). The `al` MCP server is a local stdio server, so it
-  doesn't run on claude.ai web.
-- Microsoft's AL toolchain, installed separately. The plugin does **not** bundle it. Use either:
-  - the AL Development Tools .NET global tool:
-    `dotnet tool install -g Microsoft.Dynamics.BusinessCentral.Development.Tools`, or
-  - the AL Language VS Code extension (`ms-dynamics-smb.al`).
-- Start Claude Code from inside an AL project folder (one that contains `app.json`).
-
-## Install
-
-```
-/plugin install bc365-al-toolkit@<marketplace>
-/reload-plugins
+```powershell
+codex plugin marketplace add C:\claude-al-toolkit
+codex plugin add bc365-al-toolkit@al-toolkit-marketplace
+Set-Location 'C:\path\to\AlProject'
+codex
 ```
 
-Then `claude mcp list` should show `al`.
+Inspect `/mcp`; invoke `$al-analyst`, `$al-developer`, and `$al-reviewer`.
+Each skill finds the selected AL project, sets `AL_PROJECT_DIR` for shell commands,
+and calls Microsoft’s `al_addproject` before using the AL MCP tools. The Codex server
+starts without a default project and loads the selected app dynamically.
 
-## Configuration (optional environment variables)
+**Claude Code:** add the repository marketplace, run
+`/plugin install bc365-al-toolkit@al-toolkit-marketplace`, then `/reload-plugins`.
+Start in the AL project and inspect `claude mcp list`. Claude uses `.mcp.json` and
+its working directory unless `AL_PROJECT_DIR` overrides it.
 
-| Variable | Purpose |
-|---|---|
-| `AL_BIN` | Folder that contains `altool.exe` / `alc.exe`; skips auto-discovery |
-| `AL_EXTENSIONS_DIR` | VS Code extensions root to search |
-| `AL_PROJECT_DIR` | AL project passed to the MCP server (default: current directory) |
-| `AL_PACKAGECACHE` | Symbol folder for builds (default: `<project>\.alpackages`) |
-| `AL_ANALYZERS` | Semicolon list of cops for builds, e.g. `CodeCop;PerTenantExtensionCop` |
+## Runtime access
 
-## What this plugin runs, reads, and connects to
+The package contains skills, manifests, an icon, and readable batch scripts. It
+changes no host permission settings.
 
-The plugin itself contains only Markdown skills, JSON manifests, and three readable
-batch scripts. It does not download anything, contact any server itself, or collect
-telemetry, and it doesn't change Claude's permission settings.
+- `scripts/find-al-bin.cmd` reads environment variables and installed tool folders;
+  it uses `dotnet --list-runtimes` when checking the .NET global tool.
+- `scripts/al-mcp-codex.cmd` launches `altool.exe launchmcpserver --transport stdio`
+  without a default project. Skills add the selected project through `al_addproject`.
+- `scripts/al-build.cmd` runs `alc.exe`, writes an `.app`, and removes its temporary
+  log. Skills resolve the script relative to their installed file location.
+- Microsoft's MCP tools can read metadata, compile, build, download symbols,
+  authenticate, publish, and run tests with the host's permissions and user
+  credentials. Skills restrict auth/publish to explicit deployment requests;
+  Production requires a named target and confirmation. Environment tests require
+  explicitly selected tests and a non-production target. Symbols download only
+  when missing/stale or required by diagnostics.
+- Microsoft Learn MCP and permission-set skills are optional and are not bundled.
+  When unavailable, use official documentation and direct permission-set work.
 
-- **MCP server launch** (`scripts/al-mcp.cmd`): finds
-  `altool.exe` with `scripts/find-al-bin.cmd`, then runs
-  `altool.exe launchmcpserver --transport stdio <project>`. The `al` server is
-  Microsoft's software. Its tools run on your machine, with your credentials.
-- **Toolchain discovery** (`scripts/find-al-bin.cmd`): reads the environment variables
-  above plus `%USERPROFILE%` and `%LOCALAPPDATA%`, runs `where dotnet` and
-  `dotnet --list-runtimes` to pick a .NET tool folder, and lists VS Code extension
-  folders (stable, Insiders, Server, OSS, portable, Program Files). It only reads the
-  file system and doesn't change anything.
-- **Build fallback** (`scripts/al-build.cmd`): runs `alc.exe` on your project and
-  writes the `.app` file the compiler produces. It writes a temporary log to `%TEMP%`
-  and deletes it after the build.
-- **Network access through the `al` MCP server.** Some of Microsoft's tools reach
-  your Business Central environment or Microsoft services when Claude calls them:
-  `al_auth_login` / `al_auth_logout` (Microsoft Entra sign-in), `al_downloadsymbols`
-  (downloads symbol packages from your environment), `al_publish` (deploys your
-  extension to the environment in your `launch.json`), and `al_run_tests` (runs tests
-  on that environment). The skills call only `al_compile`, `al_getdiagnostics`,
-  `al_downloadsymbols`, and `al_symbolsearch`; they never publish. Claude Code asks for
-  your permission before it calls an MCP tool unless you've allowed it.
-
-## License
+Overrides: `AL_BIN`, `AL_EXTENSIONS_DIR`, `VSCODE_EXTENSIONS` for discovery;
+`AL_PROJECT_DIR` is set by each skill for shell commands; `AL_PACKAGECACHE` and `AL_ANALYZERS` for compiler
+fallback. Missing compiler evidence means **NOT VERIFIED**.
 
 MIT. See [LICENSE](LICENSE).

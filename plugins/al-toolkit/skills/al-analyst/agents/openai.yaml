@@ -1,0 +1,4 @@
+interface:
+  display_name: "AL Requirement Analyst"
+  short_description: "Design Business Central AL changes before coding"
+  default_prompt: "Use $al-analyst to analyze this Business Central requirement and recommend an implementation."

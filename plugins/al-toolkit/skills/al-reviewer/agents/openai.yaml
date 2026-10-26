@@ -1,0 +1,4 @@
+interface:
+  display_name: "AL Code Reviewer"
+  short_description: "Review AL changes with independent compiler evidence"
+  default_prompt: "Use $al-reviewer to review these AL changes and independently verify compiler diagnostics."

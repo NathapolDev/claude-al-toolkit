@@ -1,5 +1,7 @@
 # Business Central AL Rules
 
+User instructions and the target project's AGENTS.md take precedence over these defaults.
+
 ## Official Sources
 
 - Microsoft Learn Business Central: https://learn.microsoft.com/en-us/dynamics365/business-central/
@@ -11,7 +13,7 @@
 - Use PascalCase for variables, function names, object names, table names, page names, codeunits, reports, interfaces, and enums.
 - Use descriptive names. Avoid abbreviations unless they are established Business Central terms such as `Cust.` or `Vend.`.
 - Keep AL object names within the platform object name limit. When a project uses a 3-character prefix plus a space, keep the base name to 26 characters or less.
-- Use 4-space indentation.
+- Use 2-space indentation.
 - Keep procedures small and focused.
 - Organize new files by business feature unless the repo already has a clear different convention.
 - Name files as `<ObjectName>.<ObjectType>.al`, for example `NoSeries.Page.al`, `SalesHeader.TableExt.al`, `INoSeries.Interface.al`, `NoSeriesImpl.Codeunit.al`.
@@ -96,7 +98,7 @@
 ### Code Style & Formatting
 
 - PascalCase for all variable names, function names, and object names.
-- 4-space indentation consistently.
+- 2-space indentation consistently.
 - Keep procedures small and focused — one procedure, one concern.
 - Organize files by business feature:
   ```
@@ -188,7 +190,7 @@ if MyTable.FindSet() then
 | 1 | PascalCase for all names | Naming |
 | 2 | File named `<Name>.<Type>.al` | Naming |
 | 3 | Object name respects platform and prefix limits | Naming |
-| 4 | 4-space indentation | Style |
+| 4 | 2-space indentation | Style |
 | 5 | One procedure, one concern | Style |
 | 6 | Feature-based folder structure for new files | Style |
 | 7 | XML documentation on global procedures | Style |

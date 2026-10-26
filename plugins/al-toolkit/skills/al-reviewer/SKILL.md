@@ -12,26 +12,47 @@ issues with reasons and concrete fix suggestions.
 
 Review against the official Microsoft AL guidelines,
 https://alguidelines.dev/docs/bestpractices/, and the canonical house rules in
-`${CLAUDE_PLUGIN_ROOT}/references/al-rules.md`.
+`../../references/al-rules.md`.
+
+## Host integration
+Resolve `../../references/al-rules.md` and `../../scripts/al-build.cmd` from this
+installed `SKILL.md` directory, then use their absolute paths when reading/running
+files. These paths are not relative to the AL project or shell working directory.
+Before review, follow `../../references/project-session.md` to select the AL project,
+set `AL_PROJECT_DIR`, and call `al_addproject` before any project-bound AL tool.
+Reinitialize it for every reviewer-skill invocation.
+Follow user instructions and the target project's `AGENTS.md` before bundled rules.
+Discover connected `al` MCP tools through the host tool catalog; Codex may expose
+names with an MCP prefix. Use ToolSearch only on hosts that provide it.
+Microsoft Learn MCP and other named skills are optional: if unavailable, use official
+Microsoft documentation and perform the needed permission-set work directly.
+
+Search workspace source first. For symbols outside the workspace, inspect
+`al_getpackagedependencies` when the app/version matters, then use narrow
+`al_symbolsearch` filters with `scope = dependencies`. Validate each result's path
+and app identity; report the confirmed signature and app/version when material.
+Symbol metadata does not expose dependency procedure bodies. Mark unobservable
+posting/copy/validation control flow as unverified rather than asserting it.
 
 ## Workflow
 1. Read the context — the requirement/analysis and what was implemented.
 2. Check requirement coverage — every acceptance criterion met? anything missing / out of scope?
 3. Read the changed code against the checklist below.
 4. **Verify the build yourself** — don't trust a report alone:
-   - **Primary — AL MCP server (`al` MCP, when connected):** load tools via ToolSearch
-     (`select:al_compile,al_getdiagnostics`), then `al_compile` (with
+   - **Primary — AL MCP server (`al` MCP, when connected):** discover
+     `al_compile` and `al_getdiagnostics` in the host tool catalog, then `al_compile` (with
      `enableCodeAnalysis: true` and the cops matching app.json `target`) →
      `al_getdiagnostics` to confirm 0 errors; review remaining warnings.
    - **Fallback — MCP not connected:** build with the bundled script
-     `${CLAUDE_PLUGIN_ROOT}/scripts/al-build.cmd "<projectDir>"` (alc.exe; ships with this
+     `../../scripts/al-build.cmd "<projectDir>"` (alc.exe; ships with this
      plugin so it works on every machine) and read its diagnostics — it exits non-zero on
      failure and prints `BUILD OK` when clean. Set `AL_ANALYZERS` (e.g.
      `CodeCop;PerTenantExtensionCop`) to include cop findings. The separate **al-compiler**
      skill works too if installed. If `al_*` tools are missing, tell the user to check
-     `claude mcp list` (the `al` MCP server is registered by this plugin's `.mcp.json` and
-     needs Claude Code started in the project folder, plus an AL toolchain on the machine:
-     the AL Development Tools .NET tool or the AL Language VS Code extension).
+     `/mcp` in Codex or `claude mcp list` in Claude Code. Codex uses
+     `.mcp.codex.json`; each skill selects the project with `al_addproject` and sets
+     `AL_PROJECT_DIR` for shell commands. Claude uses `.mcp.json` and the project
+     working directory. Both need Microsoft's AL tool or AL Language extension.
    - If you cannot run any real build, say so explicitly and mark the build check as
      NOT VERIFIED — never assume it compiles.
 5. Check tests — **only if tests were requested or already exist**: review coverage of
@@ -41,7 +62,7 @@ https://alguidelines.dev/docs/bestpractices/, and the canonical house rules in
 
 ## Review checklist
 - **A. Requirement** — meets all acceptance criteria; no scope creep; approach appropriate.
-- **B. Coding standard** — lowercase keywords, PascalCase built-ins, 4-space indent, braces
+- **B. Coding standard** — lowercase keywords, PascalCase built-ins, 2-space indent, braces
   on new line; one statement per line; begin..end compound only; if/else separated;
   end/else paired; no unnecessary else / true-false; prefix/affix on names (per app.json
   `target` rules); object IDs within app.json `idRanges`; reference by name not ID; one
@@ -121,5 +142,11 @@ https://alguidelines.dev/docs/bestpractices/, and the canonical house rules in
   return for re-review.
 
 ## Reference
-- Canonical house rules: `${CLAUDE_PLUGIN_ROOT}/references/al-rules.md`
+- Canonical house rules: `../../references/al-rules.md`
 - AL Best Practices: https://alguidelines.dev/docs/bestpractices/
+
+## Environment operations
+Use `al_auth_login`, `al_auth_logout`, and `al_publish` only for an explicit deployment
+request. Production publishing requires an explicitly named target and confirmation.
+Run `al_run_tests` only for explicitly selected tests in a non-production environment.
+Download symbols only when missing/stale or required by diagnostics.

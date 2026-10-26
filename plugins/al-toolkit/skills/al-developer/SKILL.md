@@ -13,15 +13,35 @@ ensure the code compiles cleanly with zero diagnostics before declaring done.
 
 Follow the official Microsoft AL guidelines and
 https://alguidelines.dev/docs/bestpractices/ (including the "Vibe Coding Rules for AL").
-Full house rules: `${CLAUDE_PLUGIN_ROOT}/references/al-rules.md` (canonical
+Full house rules: `../../references/al-rules.md` (canonical
 — read it when in doubt instead of guessing).
+
+## Host integration
+Resolve `../../references/al-rules.md` and `../../scripts/al-build.cmd` from this
+installed `SKILL.md` directory, then use their absolute paths when reading/running
+files. These paths are not relative to the AL project or shell working directory.
+Before feasibility checks or code changes, follow `../../references/project-session.md`
+to select the AL project, set `AL_PROJECT_DIR`, and call `al_addproject` before any
+project-bound AL tool. Reinitialize it for every developer-skill invocation.
+Follow user instructions and the target project's `AGENTS.md` before bundled rules.
+Discover connected `al` MCP tools through the host tool catalog; Codex may expose
+names with an MCP prefix. Use ToolSearch only on hosts that provide it.
+Microsoft Learn MCP and other named skills are optional: if unavailable, use official
+Microsoft documentation and perform the needed permission-set work directly.
+
+Search workspace source first. For symbols outside the workspace, inspect
+`al_getpackagedependencies` when the app/version matters, then use narrow
+`al_symbolsearch` filters with `scope = dependencies`. Validate each result's path
+and app identity; report the confirmed signature and app/version when material.
+Symbol metadata does not expose dependency procedure bodies. Mark unobservable
+posting/copy/validation control flow as unverified rather than asserting it.
 
 ## Workflow
 1. Read the analysis (or, if none, do a quick feasibility scan first and note that an
    al-analyst pass was skipped).
 2. **Verify feasibility before writing** — confirm objects/fields/methods/event
-   signatures actually exist (use `al_symbolsearch` or the AL LSP, not text grep, for
-   symbols); confirm the event to subscribe to exists and its signature matches; check
+   signatures actually exist (search workspace source first; use `al_symbolsearch`
+   or the AL LSP for dependency symbols); confirm the event to subscribe to exists and its signature matches; check
    app.json dependencies, `idRanges` for new object IDs, and platform/runtime version.
    If the planned approach isn't feasible, say why, pick the best fallback, and explain
    the change.
@@ -36,30 +56,32 @@ Full house rules: `${CLAUDE_PLUGIN_ROOT}/references/al-rules.md` (canonical
 7. Summarize what changed, key decisions, and build results; recommend an al-reviewer pass.
 
 ## Build tooling — never guess compile results
-**Primary — AL MCP server (`al` MCP, when connected):** tools are deferred; load them
-first with ToolSearch (`select:al_compile,al_getdiagnostics,al_downloadsymbols,al_symbolsearch`).
+**Primary — AL MCP server (`al` MCP, when connected):** discover `al_compile`,
+`al_getdiagnostics`, `al_downloadsymbols`, and `al_symbolsearch` in the host tool catalog.
+Inspect existing targeted diagnostics with `al_getdiagnostics` before changing code.
 Then: `al_downloadsymbols` (if symbols missing/stale) → `al_compile` (fast, no .app;
 set `enableCodeAnalysis: true` with `codeAnalyzers` = `${CodeCop}` + `${PerTenantExtensionCop}`
 for PTE or `${AppSourceCop}` for AppSource, per app.json `target`) → `al_getdiagnostics`
 → fix → repeat until clean. Use `al_build` only when a `.app` file is needed.
 
 **Fallback — if the `al` MCP server is not connected:** build with the bundled script
-`${CLAUDE_PLUGIN_ROOT}/scripts/al-build.cmd "<projectDir>"` (alc.exe; ships with this
+`../../scripts/al-build.cmd "<projectDir>"` (alc.exe; ships with this
 plugin, so it works on every machine). It resolves the AL toolchain itself, prints the
 compiler diagnostics, and exits non-zero on failure — read the errors from its output and
 fix until it prints `BUILD OK`. Run code analysis by setting `AL_ANALYZERS` first
 (`CodeCop;PerTenantExtensionCop` for PTE, `CodeCop;AppSourceCop` for AppSource, per
 app.json `target`). If the user has the separate **al-compiler** skill installed, that
-works too. Note: the `al` MCP server is registered by this plugin's `.mcp.json` and
+works too. The `al` MCP server is registered by the host-specific MCP configuration and
 requires an AL toolchain on the machine — the AL Development Tools .NET tool
 (`dotnet tool install -g Microsoft.Dynamics.BusinessCentral.Development.Tools`) or the AL
-Language VS Code extension (`ms-dynamics-smb.al-*`) — plus Claude Code started from the AL project folder; if `al_*` tools are
-missing, tell the user to check `claude mcp list`.
+Language VS Code extension (`ms-dynamics-smb.al-*`) — plus the correct AL project.
+Each skill selects the AL project dynamically. Inspect `/mcp` in Codex or
+`claude mcp list` in Claude Code if tools are missing.
 
 Either way: if you cannot run a real build, do NOT report the task as done — say so.
 
 ## Coding standard (mandatory)
-- **Formatting:** lowercase keywords; PascalCase built-ins; 4-space indent; braces on a
+- **Formatting:** lowercase keywords; PascalCase built-ins; 2-space indent; braces on a
   new line; one statement per line; begin..end compound only; separate if/else; pair
   end/else; avoid unnecessary else / true-false / blank lines.
 - **Naming & files:** object names start with team prefix/affix; one object per file;
@@ -121,8 +143,14 @@ Either way: if you cannot run a real build, do NOT report the task as done — s
 - When implementation is ready, recommend reviewing it with the **al-reviewer** skill.
 
 ## Reference
-- Canonical house rules: `${CLAUDE_PLUGIN_ROOT}/references/al-rules.md`
+- Canonical house rules: `../../references/al-rules.md`
 - AL Best Practices: https://alguidelines.dev/docs/bestpractices/
 - Design Patterns: https://alguidelines.dev/docs/patterns/
 - Vibe Coding Rules for AL: https://alguidelines.dev/docs/agentic-coding/vibe-coding-rules/
 - AL MCP server reference: https://learn.microsoft.com/dynamics365/business-central/dev-itpro/developer/al-agent-tools/al-mcp-server
+
+## Environment operations
+Use `al_auth_login`, `al_auth_logout`, and `al_publish` only for an explicit deployment
+request. Production publishing requires an explicitly named target and confirmation.
+Run `al_run_tests` only for explicitly selected tests in a non-production environment.
+Download symbols only when missing/stale or required by diagnostics.

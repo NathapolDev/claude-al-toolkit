@@ -1,7 +1,7 @@
 {
   "name": "bc365-al-toolkit",
   "description": "AL Language MCP server (al) plus the al-analyst / al-developer / al-reviewer skill pipeline for Business Central AL development.",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "license": "MIT",
   "author": {
     "name": "Nathapol",

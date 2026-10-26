@@ -1,0 +1,30 @@
+{
+  "name": "bc365-al-toolkit",
+  "version": "1.4.0",
+  "description": "Analyze, implement, and review Business Central AL with three skills and Microsoft's local AL MCP server.",
+  "license": "MIT",
+  "author": {
+    "name": "Nathapol",
+    "email": "nathapoj@gmail.com"
+  },
+  "repository": "https://github.com/NathapolDev/claude-al-toolkit",
+  "keywords": ["business-central", "al", "bc365", "mcp", "dynamics-365", "codex"],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.codex.json",
+  "requires_local_executor": true,
+  "interface": {
+    "displayName": "BC365 AL Toolkit",
+    "shortDescription": "Analyze, implement, and review Business Central AL",
+    "longDescription": "Three AL workflow skills, shared coding rules, Microsoft's local AL MCP server, and a Windows compiler fallback. Each skill sets AL_PROJECT_DIR for shell commands and loads its selected project dynamically.",
+    "developerName": "Nathapol",
+    "category": "Developer Tools",
+    "capabilities": ["Read", "Write"],
+    "composerIcon": "./.claude-plugin/icon.png",
+    "logo": "./.claude-plugin/icon.png",
+    "defaultPrompt": [
+      "Use $al-analyst to analyze this Business Central requirement.",
+      "Use $al-developer to implement this AL change and verify compilation.",
+      "Use $al-reviewer to review these AL changes and independently verify diagnostics."
+    ]
+  }
+}

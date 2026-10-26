@@ -1,0 +1,4 @@
+interface:
+  display_name: "AL Developer"
+  short_description: "Implement AL changes and verify compiler diagnostics"
+  default_prompt: "Use $al-developer to implement this Business Central AL change and verify compilation."

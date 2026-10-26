@@ -1,0 +1,20 @@
+{
+  "name": "al-toolkit-marketplace",
+  "interface": {
+    "displayName": "Business Central AL Toolkit"
+  },
+  "plugins": [
+    {
+      "name": "bc365-al-toolkit",
+      "source": {
+        "source": "local",
+        "path": "./plugins/al-toolkit"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}
