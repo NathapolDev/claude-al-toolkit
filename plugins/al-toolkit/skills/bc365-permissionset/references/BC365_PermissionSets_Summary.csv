@@ -1,0 +1,168 @@
+﻿Source,Role ID,Role Name,Thai Description
+User-Defined (Custom Add-on),BHATARA TH LOCALIZE,Bhatara TH Localize v.22,"จัดการระบบภาษีและเอกสารทางกฎหมายของไทย (VAT, WHT, Billing Note, Receipt) - เหมาะกับฝ่ายบัญชีและการเงิน"
+User-Defined (Custom Add-on),BHATARAVERTICAL-GLBU,BhataraVertical-GLBudgetContro,ควบคุมงบประมาณระดับบัญชีแยกประเภททั่วไป (GL Budget Control) - เหมาะกับฝ่ายบัญชีและการเงิน/ฝ่ายควบคุมงบประมาณ
+User-Defined (Custom Add-on),TRS-EXT,TRS-Ext,จัดการระบบงานบริหารคลังเงิน/บริหารเงินสด (Treasury System Extension) - เหมาะกับฝ่ายการเงิน/บริหารเงิน
+System (Standard),SECURITY,Assign permissions to users,ผู้จัดการสิทธิ์การใช้งาน (จัดการบัญชีผู้ใช้งาน สิทธิ์การเข้าถึง และการตั้งค่าความปลอดภัย)
+System (Standard),SUPER,This role has all permissions.,ผู้ดูแลระบบสูงสุด มีสิทธิ์เข้าถึงและทำรายการได้ทุกอย่างในระบบโดยไม่มีข้อจำกัด
+System (Standard),SAF-T - EDIT,SAF-T - Edit,จัดการไฟล์ตรวจสอบภาษีออดิทระบบตามมาตรฐานยุโรป (SAF-T Audit)
+System (Standard),SAF-T - READ,SAF-T - Read,จัดการไฟล์ตรวจสอบภาษีออดิทระบบตามมาตรฐานยุโรป (SAF-T Audit)
+System (Standard),SUSTAINABILITY ADMIN,Sustainability - Admin,จัดการโมดูลความยั่งยืนและการปล่อยคาร์บอน (Sustainability / Carbon Emission)
+System (Standard),SUSTAINABILITY EDIT,Sustainability - Edit,จัดการโมดูลความยั่งยืนและการปล่อยคาร์บอน (Sustainability / Carbon Emission)
+System (Standard),SUSTAINABILITY READ,Sustainability - Read,จัดการโมดูลความยั่งยืนและการปล่อยคาร์บอน (Sustainability / Carbon Emission)
+System (Standard),ADD RELATED FIELDS,Add Fields in Analysis Mode,Add Fields in Analysis Mode
+System (Standard),AUTOMATE - EXEC,Automate - Exec,Automate - Exec
+System (Standard),COPILOT SYS FEATURES,Copilot System Features,Copilot System Features
+System (Standard),D365 ATTACH DEBUG,Attach Debug,Attach Debug
+System (Standard),D365 BACKUP/RESTORE,Backup or restore database,Backup or restore database
+System (Standard),D365 SNAPSHOT DEBUG,Snapshot Debug,Snapshot Debug
+System (Standard),DATA ANALYSIS - EXEC,Allow Data Analysis Mode,Allow Data Analysis Mode
+System (Standard),DATA CLEANUP - ADMIN,DATA CLEANUP - ADMIN,จัดการทำความสะอาดและล้างข้อมูลขยะหรือประวัติในฐานข้อมูล (Data Cleanup)
+System (Standard),EDIT IN EXCEL - VIEW,Edit in Excel - View,สิทธิ์เปิดหรือแก้ไขข้อมูล Business Central ผ่านโปรแกรม Excel
+System (Standard),EDIT IN EXCEL-ADMIN,Edit in Excel - Admin,สิทธิ์เปิดหรือแก้ไขข้อมูล Business Central ผ่านโปรแกรม Excel
+System (Standard),EMAIL - ADMIN,Email - Admin,สิทธิ์การตั้งค่าและการส่งอีเมลออกจากระบบ Business Central
+System (Standard),EXCEL EXPORT ACTION,D365 Excel Export Action,D365 Excel Export Action
+System (Standard),EXPORT REPORT EXCEL,Export Report DataSet to Excel,Export Report DataSet to Excel
+System (Standard),EXTEN. MGT. - ADMIN,Extension Management - Admin,ดูแลระบบความปลอดภัยและการตั้งค่าสำหรับ Extension Management - Admin
+System (Standard),FEATURE MGT. - ADMIN,Feature Management - Admin,ดูแลระบบความปลอดภัยและการตั้งค่าสำหรับ Feature Management - Admin
+System (Standard),FILE STORAGE - ADMIN,External File Storage - Admin,ดูแลระบบความปลอดภัยและการตั้งค่าสำหรับ External File Storage - Admin
+System (Standard),LOGIN,Login access,สิทธิ์การเข้าใช้งานระบบในขั้นแรก (จำเป็นสำหรับการ Log in เข้าสู่ Business Central)
+System (Standard),MCP - ADMIN,MCP - Admin,ดูแลระบบความปลอดภัยและการตั้งค่าสำหรับ MCP - Admin
+System (Standard),PAGE SUMMARY - ADMIN,Page Summary Provider - Admin,ดูแลระบบความปลอดภัยและการตั้งค่าสำหรับ Page Summary Provider - Admin
+System (Standard),PAGESCRIPTING - PLAY,Allow Page Scripting Playback,สิทธิ์สำหรับบันทึกและรันสคริปต์ขั้นตอนหน้าจอเพื่อการทดสอบระบบ (Page Scripting)
+System (Standard),PAGESCRIPTING - REC,Allow Page Scripting Recording,สิทธิ์สำหรับบันทึกและรันสคริปต์ขั้นตอนหน้าจอเพื่อการทดสอบระบบ (Page Scripting)
+System (Standard),PRIV. NOTICE - ADMIN,Privacy Notice - Admin,ดูแลระบบความปลอดภัยและการตั้งค่าสำหรับ Privacy Notice - Admin
+System (Standard),RETENTION POL. ADMIN,RETENTION POL. ADMIN,ตั้งค่าและนโยบายการลบข้อมูลประวัติเก่าในระบบเพื่อเพิ่มพื้นที่ว่าง (Retention Policy)
+System (Standard),RETENTION POL. VIEW,RETENTION POL. VIEW,ตั้งค่าและนโยบายการลบข้อมูลประวัติเก่าในระบบเพื่อเพิ่มพื้นที่ว่าง (Retention Policy)
+System (Standard),SUPER (DATA),Superuser of data,Superuser of data
+System (Standard),SYSTEM APP - ADMIN,SYSTEM APP - ADMIN,ดูแลระบบความปลอดภัยและการตั้งค่าสำหรับ SYSTEM APP - ADMIN
+System (Standard),SYSTEM APP - BASIC,SYSTEM APP - BASIC,SYSTEM APP - BASIC
+System (Standard),TROUBLESHOOT TOOLS,Troubleshoot Tools,Troubleshoot Tools
+System (Standard),VSC INTGR. - ADMIN,VS Code Integration - Admin,ดูแลระบบความปลอดภัยและการตั้งค่าสำหรับ VS Code Integration - Admin
+System (Standard),BUS. FOUND. - ADMIN,Business Foundation - Admin,สิทธิ์ออบเจกต์พื้นฐานสำหรับการทำธุรกิจและธุรกรรมขั้นต้น (Business Foundation)
+System (Standard),BUS. FOUND. - EDIT,Business Foundation - Edit,สิทธิ์ออบเจกต์พื้นฐานสำหรับการทำธุรกิจและธุรกรรมขั้นต้น (Business Foundation)
+System (Standard),BUS. FOUND. - OBJ.,Business Foundation - Objects,สิทธิ์ออบเจกต์พื้นฐานสำหรับการทำธุรกิจและธุรกรรมขั้นต้น (Business Foundation)
+System (Standard),BUS. FOUND. - READ,Business Foundation - Read,สิทธิ์ออบเจกต์พื้นฐานสำหรับการทำธุรกิจและธุรกรรมขั้นต้น (Business Foundation)
+System (Standard),BUS. FOUND. - VIEW,Business Foundation - View,สิทธิ์ออบเจกต์พื้นฐานสำหรับการทำธุรกิจและธุรกรรมขั้นต้น (Business Foundation)
+System (Standard),CONTOSO DEMO - EDIT,Contoso Demo - Edit,ชุดสิทธิ์สำหรับเครื่องมือสร้างข้อมูลสาธิตตัวอย่างของ Contoso
+System (Standard),CONTOSO DEMO - READ,Contoso Demo - Edit,ชุดสิทธิ์สำหรับเครื่องมือสร้างข้อมูลสาธิตตัวอย่างของ Contoso
+System (Standard),D365 GL REVIEW,D365 GL REVIEW,D365 GL REVIEW
+System (Standard),DIG. VOUCHER - EDIT,DIG. VOUCHER - EDIT,จัดการระบบการแนบเอกสารดิจิทัลเข้ากับใบสำคัญจ่าย (Digital Voucher)
+System (Standard),DIG. VOUCHER - READ,DIG. VOUCHER - READ,จัดการระบบการแนบเอกสารดิจิทัลเข้ากับใบสำคัญจ่าย (Digital Voucher)
+System (Standard),D365 INTERCOMPANY CE,Dynamics 365 Business Central ,จัดการการส่งรายการข้ามบริษัทในเครือแบบอัตโนมัติ (Intercompany Transactions)
+System (Standard),DATA ACCESS IC CE,Data Access Intercompany Cross,Data Access Intercompany Cross
+System (Standard),DATA ARCHIVE - READ,Data Archive - Read,จัดการการเก็บประวัติข้อมูลเก่าลงไฟล์ถาวร (Data Archive)
+System (Standard),DATA ARCHIVE - VIEW,Data Archive - View,จัดการการเก็บประวัติข้อมูลเก่าลงไฟล์ถาวร (Data Archive)
+System (Standard),STATISTICAL ACCOUNTS,STATISTICAL ACCOUNTS,STATISTICAL ACCOUNTS
+System (Standard),E-DOC. CORE - ADMIN,E-Document - Admin,จัดการระบบส่งและรับเอกสารอิเล็กทรอนิกส์ (E-Documents เช่น E-Tax Invoice/E-Receipt)
+System (Standard),E-DOC. CORE - BASIC,E-Document - Basic,จัดการระบบส่งและรับเอกสารอิเล็กทรอนิกส์ (E-Documents เช่น E-Tax Invoice/E-Receipt)
+System (Standard),E-DOC. CORE - EDIT,E-Document - Edit,จัดการระบบส่งและรับเอกสารอิเล็กทรอนิกส์ (E-Documents เช่น E-Tax Invoice/E-Receipt)
+System (Standard),E-DOC. CORE - READ,E-Document - Read,จัดการระบบส่งและรับเอกสารอิเล็กทรอนิกส์ (E-Documents เช่น E-Tax Invoice/E-Receipt)
+System (Standard),E-DOC. CORE - USER,E-Document - User,จัดการระบบส่งและรับเอกสารอิเล็กทรอนิกส์ (E-Documents เช่น E-Tax Invoice/E-Receipt)
+System (Standard),POWERBI REPORT ADMIN,Power BI Core Admin,จัดการรายงานและแดชบอร์ด Power BI ในหน้าหลักของระบบ
+System (Standard),POWERBI REPORT BASIC,Power BI Core Basic,จัดการรายงานและแดชบอร์ด Power BI ในหน้าหลักของระบบ
+System (Standard),SUB. BILLING ADMIN,Subscription Billing Admin,จัดการระบบเก็บเงินสัญญารายเดือน/รายปีแบบอัตโนมัติ (Subscription Billing)
+System (Standard),SUB. BILLING ALL,Subscription Billing All,จัดการระบบเก็บเงินสัญญารายเดือน/รายปีแบบอัตโนมัติ (Subscription Billing)
+System (Standard),SUB. BILLING BASIC,Subscription Billing Basic,จัดการระบบเก็บเงินสัญญารายเดือน/รายปีแบบอัตโนมัติ (Subscription Billing)
+System (Standard),SUB. BILLING USER,Subscription Billing User,จัดการระบบเก็บเงินสัญญารายเดือน/รายปีแบบอัตโนมัติ (Subscription Billing)
+System (Standard),SOA - EDIT,Sales Order Agent - Edit,สร้างและแก้ไขข้อมูลของระบบ Sales Order Agent - Edit
+System (Standard),SOA - READ,Sales Order Agent - Read,เปิดดูข้อมูลของระบบ Sales Order Agent - Read
+System (Standard),D365 COMPANY HUB,D365 COMPANY HUB,D365 COMPANY HUB
+System (Standard),AUDIT EXPORT - EDIT,Audit Export - Edit,จัดการการส่งออกข้อมูลทางการเงินเพื่อการตรวจสอบบัญชี (Audit Export เช่น SAF-T)
+System (Standard),AUDIT EXPORT - READ,Audit Export - Read,จัดการการส่งออกข้อมูลทางการเงินเพื่อการตรวจสอบบัญชี (Audit Export เช่น SAF-T)
+System (Standard),M365EDOCCONNEDIT,Microsoft 365 E-Document Conne,Microsoft 365 E-Document Conne
+System (Standard),M365EDOCCONNREAD,Microsoft 365 E-Document Conne,Microsoft 365 E-Document Conne
+System (Standard),PAYM. PRAC. EDIT,PAYM. PRAC. EDIT,รายงานสถิติแนวทางการจ่ายชำระเงินของบริษัท (Payment Practices)
+System (Standard),PAYM. PRAC. READ,PAYM. PRAC. READ,รายงานสถิติแนวทางการจ่ายชำระเงินของบริษัท (Payment Practices)
+System (Standard),INTR. CORE - EDIT,Intrastat Core - Edit,จัดการการนำส่งรายงานภาษีศุลกากรระหว่างประเทศสหภาพยุโรป (Intrastat)
+System (Standard),INTR. CORE - READ,Intrastat Core - Read,จัดการการนำส่งรายงานภาษีศุลกากรระหว่างประเทศสหภาพยุโรป (Intrastat)
+System (Standard),GENERATEDPERMISSION,GENERATEDPERMISSION,GENERATEDPERMISSION
+System (Standard),ADMINISTRATOR,Create and set up companies,Create and set up companies
+System (Standard),AGENT - ADMIN,Agent administrator,ดูแลระบบความปลอดภัยและการตั้งค่าสำหรับ Agent administrator
+System (Standard),AGENT - DIAGNOSTICS,Agent Diagnostics,Agent Diagnostics
+System (Standard),D365 ACC. PAYABLE,Dynamics 365 Accounts payable,สิทธิ์จัดการงานเจ้าหนี้และซื้อสินค้า (สร้าง แก้ไข ใบสั่งซื้อ ใบกำกับภาษีซื้อ และสมุดการจ่ายชำระเงิน)
+System (Standard),D365 ACC. RECEIVABLE,Dyn. 365 Accounts receivable,สิทธิ์จัดการงานลูกหนี้และขายสินค้า (สร้าง แก้ไข ใบสั่งขาย ใบกำกับภาษีขาย และสมุดการรับชำระเงิน)
+System (Standard),D365 ACCOUNTANTS,Dynamics 365 for Accountants,สิทธิ์สำหรับนักบัญชี สามารถจัดการบัญชีแยกประเภททั่วไป (G/L) บันทึกรายวัน รายงานการเงิน และมิติข้อมูล
+System (Standard),"D365 ADCS, EDIT",Dynamics 365 Create ADCS,Dynamics 365 Create ADCS
+System (Standard),"D365 ADCS, VIEW",Dynamics 365 View ADCS,Dynamics 365 View ADCS
+System (Standard),"D365 ASSEMBLY, EDIT",Dynamics 365 Create assembly,"จัดการประกอบสินค้าอย่างง่าย (Assembly Orders, Assembly BOM)"
+System (Standard),"D365 ASSEMBLY, SETUP",Dynamics 365 Setup assembly,ตั้งค่าระบบการประกอบสินค้าเบื้องต้น
+System (Standard),"D365 ASSEMBLY, VIEW",Dynamics 365 View assembly,เปิดดูรายการสินค้าประกอบและใบประกอบสินค้า
+System (Standard),D365 AUTOMATION,Dynamics 365 Automation,Dynamics 365 Automation
+System (Standard),D365 BANKING,Dynamics 365 Banking,จัดการเงินฝากธนาคาร การกระทบยอดธนาคาร (Bank Reconciliation) และสมุดเงินฝาก
+System (Standard),D365 BASIC,Dynamics 365 Basic access,สิทธิ์เข้าถึงขั้นพื้นฐานของระบบเพื่อใช้งานตารางระบบพื้นฐานทั้งหมด
+System (Standard),D365 BASIC ISV,Dyn. 365 Basic ISV Acc.,Dyn. 365 Basic ISV Acc.
+System (Standard),D365 BUS FULL ACCESS,Dyn. 365 Full Business Acc.,Dyn. 365 Full Business Acc.
+System (Standard),D365 BUS PREMIUM,Dyn. 365 Prem. Bus. Full Acc.,Dyn. 365 Prem. Bus. Full Acc.
+System (Standard),D365 CASH FLOW,Dynamics 365 Cash Flow,วิเคราะห์และจัดการกระแสเงินสด รวมถึงการพยากรณ์เงินหมุนเวียน (Cash Flow Forecasting)
+System (Standard),"D365 COSTACC, EDIT",Dyn. 365 Edit Cost Accounting,จัดการและดูรายงานบัญชีต้นทุน / บัญชีบริหาร (Cost Accounting) เพื่อวิเคราะห์ค่าใช้จ่ายแยกแผนก
+System (Standard),"D365 COSTACC, SETUP",Dyn. 365 Setup Cost Accounting,จัดการและดูรายงานบัญชีต้นทุน / บัญชีบริหาร (Cost Accounting) เพื่อวิเคราะห์ค่าใช้จ่ายแยกแผนก
+System (Standard),"D365 COSTACC, VIEW",Dyn. 365 View Cost Accounting,จัดการและดูรายงานบัญชีต้นทุน / บัญชีบริหาร (Cost Accounting) เพื่อวิเคราะห์ค่าใช้จ่ายแยกแผนก
+System (Standard),"D365 CUSTOMER, EDIT",Dynamics 365 Create customers,สร้างและแก้ไขข้อมูลลูกค้าหลัก (Customer Master Data)
+System (Standard),"D365 CUSTOMER, VIEW",Dynamics 365 View customers,เปิดดูข้อมูลลูกค้าหลักเท่านั้น ไม่สามารถแก้ไขได้
+System (Standard),D365 DIM CHANGE GLO,D365 Change Global Dimension,D365 Change Global Dimension
+System (Standard),D365 DIM CORRECTION,D365 Dimension Correction,D365 Dimension Correction
+System (Standard),D365 DYN CRM MGT,Dynamics 365 Sales Integration,Dynamics 365 Sales Integration
+System (Standard),D365 DYN CRM READ,Dynamics 365 Sales Integration,Dynamics 365 Sales Integration
+System (Standard),"D365 FA, EDIT",Dyn. 365 Create Fixed Assets,จัดการข้อมูลทะเบียนสินทรัพย์คงเหลือและคำนวณค่าเสื่อมราคา (Fixed Assets)
+System (Standard),"D365 FA, SETUP",Dyn. 365 Fixed Assets Setup,ตั้งค่าการคิดค่าเสื่อมราคาและกลุ่มสินทรัพย์ถาวร
+System (Standard),"D365 FA, VIEW",Dynamics 365 View Fixed Assets,เปิดดูรายละเอียดทะเบียนสินทรัพย์และค่าเสื่อมราคา (เปิดดูได้อย่างเดียว)
+System (Standard),D365 FIN CONS SETUP,Dynamics 365 Business Central ,Dynamics 365 Business Central 
+System (Standard),D365 FIN. & PURCH.,Finance and purchase data,Finance and purchase data
+System (Standard),D365 FIN. CONSOLID,Dynamics 365 Business Central ,Dynamics 365 Business Central 
+System (Standard),D365 FINANCE,Read and write finance data,เปิดดูข้อมูลของระบบ Read and write finance data
+System (Standard),D365 FINANCIAL REP.,Dynamics 365 Financial reports,Dynamics 365 Financial reports
+System (Standard),D365 FULL ACCESS,Dynamics 365 Full access,Dynamics 365 Full access
+System (Standard),D365 GLOBAL DIM MGT,Dyn. 365 Change Global Dim,Dyn. 365 Change Global Dim
+System (Standard),"D365 HR, EDIT",Dynamics 365 Create Basic HR,จัดการและแก้ไขข้อมูลพนักงาน สัญญาจ้าง และบันทึกการลา (HR Basic Module)
+System (Standard),"D365 HR, SETUP",Dynamics 365 Basic HR Setup,ตั้งค่ากลุ่มพนักงาน สาเหตุการขาดงาน หรือรหัสหน่วยงานย่อย
+System (Standard),"D365 HR, VIEW",Dynamics 365 View Basic HR,เปิดดูประวัติและทะเบียนพนักงานทั่วไป
+System (Standard),D365 IC PARTNER EDIT,Create and modify Intercompany,Create and modify Intercompany
+System (Standard),"D365 IC, EDIT",Dyn. 365 Edit Intercompany,สร้างและแก้ไขข้อมูลของระบบ Dyn. 365 Edit Intercompany
+System (Standard),"D365 IC, SETUP",Dyn. 365 Intercompany Setup,ตั้งค่าและปรับปรุงโมดูล Dyn. 365 Intercompany Setup
+System (Standard),"D365 IC, VIEW",Dyn. 365 View Intercompany,Dyn. 365 View Intercompany
+System (Standard),"D365 INV DOC, CREATE",Dyn. 365 Create inventory doc,สร้างสมุดตรวจนับหรือใบปรับปรุงยอดสินค้าคงคลัง (Inventory Adjustments / Physical Inventory Journals)
+System (Standard),"D365 INV DOC, POST",Dyn. 365 Post inventory doc,โพสต์เพื่อปรับปรุงยอดสินค้าคงคลังให้ตรงกับยอดตรวจนับจริง
+System (Standard),"D365 INV, SETUP",Dyn. 365 Inventory Setup,ตั้งค่าระบบสินค้าคงคลัง เช่น การตัดสต็อก ต้นทุนสินค้า และคลังสินค้าเบื้องต้น
+System (Standard),D365 ITEM AVAIL CALC,Calculate item availability,Calculate item availability
+System (Standard),"D365 ITEM, EDIT",Dynamics 365 Create items,สร้าง แก้ไข และจัดการทะเบียนข้อมูลสินค้าหลัก (Item Master Data)
+System (Standard),"D365 ITEM, VIEW",Dynamics 365 View items,ดูรายละเอียดและข้อมูลสินค้าเท่านั้น (อ่านอย่างเดียว)
+System (Standard),"D365 JOBS, EDIT",Dynamics 365 Create Projects,จัดการและควบคุมโครงการ เช่น การสร้างงาน ยอดเงินที่ใช้ และการคำนวณ WIP (Project / Jobs)
+System (Standard),"D365 JOBS, SETUP",Dynamics 365 Projects Setup,ตั้งค่าบัญชีกลุ่มและวิธีการคำนวณงานระหว่างทำ (WIP Method) ของโครงการ
+System (Standard),"D365 JOBS, VIEW",Dynamics 365 View Projects,เปิดดูข้อมูลสถานะโครงการและการเปรียบเทียบงบประมาณจริงของโครงการ
+System (Standard),"D365 JOURNALS, EDIT",Dynamics 365 Edit journals,สร้างและแก้ไขข้อมูลของระบบ Dynamics 365 Edit journals
+System (Standard),"D365 JOURNALS, POST",Dynamics 365 Post journals,Dynamics 365 Post journals
+System (Standard),D365 MONITOR FIELDS,Monitor Field Change Mgt.,ติดตามการเปลี่ยนแปลงฟิลด์ข้อมูลสำคัญในระบบ (Field Change Monitoring)
+System (Standard),D365 OPPORTUNITY MGT,Dynamics 365 Opportunity Mgt.,Dynamics 365 Opportunity Mgt.
+System (Standard),D365 PROFILE MGT,D365 Profile Mgt & Customiz.,D365 Profile Mgt & Customiz.
+System (Standard),"D365 PURCH DOC, EDIT",Dyn. 365 Create purch. doc.,สร้าง แก้ไข ใบเสนอราคาซื้อ และใบสั่งซื้อสินค้า (Purchase Order)
+System (Standard),"D365 PURCH DOC, POST",Dyn. 365 Post purchase doc.,โพสต์บันทึกการรับสินค้าจากใบสั่งซื้อและบิลซื้อ (Posted Purchase Invoice/Receipt)
+System (Standard),D365 RAPIDSTART,Dynamics 365 RapidStart,Dynamics 365 RapidStart
+System (Standard),D365 READ,Dyn. 365 Read access all,เปิดดูข้อมูลของระบบ Dyn. 365 Read access all
+System (Standard),D365 RM SETUP,Dynamics 365 Rlshp. Mgt. Setup,ตั้งค่าและปรับปรุงโมดูล Dynamics 365 Rlshp. Mgt. Setup
+System (Standard),D365 SALES,Post sales documents,Post sales documents
+System (Standard),"D365 SALES DOC, EDIT",Dynamics 365 Create sales doc.,สร้าง แก้ไข ใบเสนอราคา ใบสั่งขาย (Sales Order) และบันทึกงานขาย
+System (Standard),"D365 SALES DOC, POST",Dynamics 365 Post sales doc.,โพสต์ใบสั่งขายและพิมพ์ใบกำกับภาษีขาย (Posted Sales Invoice/Shipment)
+System (Standard),D365 SETUP,Dyn. 365 Company data setup,ตั้งค่าและปรับปรุงโมดูล Dyn. 365 Company data setup
+System (Standard),D365 TEAM MEMBER,Dynamics 365 Team Member,สิทธิ์สำหรับพนักงานทั่วไป (อ่านได้เกือบทุกอย่าง แก้ไขได้เฉพาะใบเสนอราคา สมุดบันทึกเวลา และข้อมูลส่วนตัว)
+System (Standard),"D365 VENDOR, EDIT",Dynamics 365 Create vendors,สร้างและแก้ไขข้อมูลผู้ขายหลัก (Vendor Master Data)
+System (Standard),"D365 VENDOR, VIEW",Dynamics 365 View vendors,เปิดดูข้อมูลผู้ขายหลักเท่านั้น ไม่สามารถแก้ไขได้
+System (Standard),D365 WEBHOOK SUBSCR,D365 Webhook Subscription,D365 Webhook Subscription
+System (Standard),"D365 WHSE, EDIT",Dynamics 365 Create warehouse,จัดการกระบวนการหยิบ จัดเก็บ และเคลื่อนย้ายสินค้าในคลังสินค้าขนาดใหญ่ (WMS)
+System (Standard),"D365 WHSE, SETUP",Dynamics 365 Setup warehouse,"ตั้งค่าโครงสร้างคลังสินค้า (Zone, Bin, Put-away template)"
+System (Standard),"D365 WHSE, VIEW",Dynamics 365 View warehouse,เปิดดูสถานะคลังสินค้าและการจัดวางสินค้าใน Bin
+System (Standard),"D365PREM MFG, EDIT",Dyn. 365 Create manufacturing,"จัดการและสั่งงานผลิต (สร้างใบสั่งผลิต Production Orders, กำหนดขั้นตอน Routing)"
+System (Standard),"D365PREM MFG, VIEW",Dyn. 365 View manufacturing,เปิดดูสถานะและรายงานวางแผนการผลิต (อ่านอย่างเดียว)
+System (Standard),"D365PREM SMG, EDIT",D365 Service Management Edit,จัดการประวัติการบริการลูกค้า ใบสั่งซ่อม และรายละเอียดงานบริการช่าง (Service Management)
+System (Standard),"D365PREM SMG, SETUP",D365 Service Management Setup,ตั้งค่าอัตราค่าบริการ กลุ่มอาการเสียของอุปกรณ์ และการรับประกัน
+System (Standard),"D365PREM SMG, VIEW",D365 Service Management View,เปิดดูใบงานบริการและการจัดตารางงานช่างซ่อม
+System (Standard),EXT. EVENTS - SUBSCR,External Events - Subscribe,External Events - Subscribe
+System (Standard),INTELLIGENT CLOUD,D365 Intelligent Cloud,จัดการการเชื่อมต่อข้อมูลกับระบบคลาวด์อัจฉริยะ (Intelligent Cloud)
+System (Standard),MERGE DUPLICATES,Merge Duplicates,Merge Duplicates
+System (Standard),PAGE INSPECTION,PAGE INSPECTION,เปิดใช้งานตัวตรวจสอบหน้าออบเจกต์ (Page Inspection / Help & Support -> Inspect Pages)
+System (Standard),TEST TOOL,Test Tool,เครื่องมือพัฒนาและรันโค้ดสำหรับทดสอบระบบ (Testing Framework)
+System (Standard),SHPFY - ADMIN,Shopify - Admin,จัดการและตั้งค่าระบบเชื่อมโยงระหว่าง Business Central กับร้านค้า Shopify
+System (Standard),PAYABLES AG. - ADM.,Payables Agent - Administratio,ดูแลระบบความปลอดภัยและการตั้งค่าสำหรับ Payables Agent - Administratio
+System (Standard),PAYABLES AG. - READ,Payables Agent - Read,เปิดดูข้อมูลของระบบ Payables Agent - Read
+System (Standard),PAYABLES AG. - RUN,Payables Agent - Run,Payables Agent - Run
+System (Standard),VAT GROUP MEMBER,VAT Group Member,VAT Group Member
+System (Standard),VAT GROUP REPRESENT.,VAT Group Representative,VAT Group Representative

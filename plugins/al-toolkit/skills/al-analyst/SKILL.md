@@ -19,26 +19,45 @@ For the full house coding rules, see
 1. **Understand the requirement** — restate the business + functional intent; identify
    actor, trigger, input/output, expected outcome.
 2. **Explore the codebase** — find affected objects (tables, pages, codeunits, reports),
-   namespace, team prefix/affix. Read `app.json`: dependencies, `idRanges` (new object
-   IDs must fit), `target` (PTE → PerTenantExtensionCop rules; AppSource → AppSourceCop
-   rules incl. affix), and platform/runtime version (limits available AL features).
+   namespace, team prefix/affix. Read `app.json`: `idRanges` (new object IDs must fit),
+   `target` (PTE → PerTenantExtensionCop rules; AppSource → AppSourceCop rules incl.
+   affix), and platform/`runtime` version (limits available AL features). Get the
+   resolved dependencies with `al_getpackagedependencies` (AL MCP, when connected — load
+   tools via ToolSearch `select:al_symbolsearch,al_getpackagedependencies,al_getnextobjectid,al_addproject`)
+   rather than trusting `app.json` alone. If a tool answers "No projects are loaded", call
+   `al_addproject` with the project folder first.
 3. **Find extension points** — available IntegrationEvent / BusinessEvent publishers,
    interfaces, extensible enums. Verify they actually exist:
-   - `al_symbolsearch` (AL MCP, when connected — load via ToolSearch) to search events,
-     objects, and fields across the project and its dependencies.
+   - `al_symbolsearch` to search events, objects, and fields across the project and its
+     dependencies (default `filters.source = "workspace"`).
+   - If the workspace search finds nothing and the object may come from an app installed
+     on the environment (not in `.alpackages`), retry with `filters.source = "environment"`.
+     This can open a Microsoft sign-in, so tell the user before calling it. Record the
+     owning app's `appId` / `appName` / `appPublisher` / `appVersion` — it becomes a
+     dependency to add to `app.json`.
    - Microsoft Learn MCP (`microsoft_docs_search` / `microsoft_docs_fetch`) to confirm
      base-app events, APIs, and platform behavior.
    - If neither can confirm, recommend the user verify via Event Recorder / AL Explorer
      and mark the extension point as "needs confirmation".
 4. **Choose an approach** — compare at least 2 options with pros/cons; state the
-   recommended one with reasoning.
+   recommended one with reasoning. Propose IDs for new objects with `al_getnextobjectid`
+   (one call per object type; `count` for several of one type). It does not reserve IDs,
+   may return non-contiguous IDs, and cannot see IDs used by other extensions on the
+   same sandbox — copy its warning into the design.
 5. **Identify risks & open questions** — assumptions, upgrade risk, performance,
    permissions, sensitive data. Always cover:
    - **DataClassification / privacy** for any new field that stores personal or
      sensitive data.
-   - **Permission sets** — new objects need permission set coverage; point to the
-     `bc365-permissionset` skill for creation/analysis.
+   - **Permission sets** — new objects need permission set coverage; point to this
+     plugin's `bc365-permissionset` skill for creation/analysis.
    - **Upgrade** — schema changes to existing data need upgrade code with Upgrade Tags.
+   - **Callers of changed procedures** — when the design changes an existing procedure's
+     signature or behavior, list its callers with
+     `${CLAUDE_PLUGIN_ROOT}/scripts/al-graph.cmd "<projectOrWorkspaceDir>" --to "obj:<Object Name>#<Procedure>" --direction callers`.
+     Selectors use object **names** (`obj:<ID>` and `Object.Procedure` silently match
+     nothing). It sees only source under that folder — callers in other apps or the base
+     app are invisible — and `--paths` output is capped, so "0 callers" is evidence, not
+     proof: confirm the selector with `--from "obj:<Object Name>"` first.
    - **TransferFields flow** — for each new field, find whether its table is copied to
      other tables with `TransferFields` (posting, archiving, copy-document; verify with
      `al_symbolsearch` / MS Learn). List every target table; the field must be added to
@@ -56,7 +75,8 @@ For the full house coding rules, see
 6. Modifying the base app directly — avoid; only when no extension point exists.
 
 ## Red flags (always surface)
-- Handled events are low quality and don't scale — prefer skip events.
+- Handled events are low quality and don't scale — avoid by default. Propose the `IsHandled`
+  pattern only when the requirement needs a subscriber to replace default logic, and say why.
 - Avoid subscribing to OnInsert/OnModify/OnDelete — it breaks bulk operations.
 - Never use AssertError (production) or encryption key functions
   (Import/Export/Create/Delete EncryptionKey) — AppSourceCop critical errors.
@@ -81,8 +101,10 @@ For the full house coding rules, see
 ### Option A — method / pros / cons / upgrade impact
 ### Option B — method / pros / cons / upgrade impact
 ## 5. Recommended Approach
-- Chosen option + why; proposed object structure (name + prefix + type + ID within
-  idRanges); where to subscribe/extend
+- Chosen option + why; proposed object structure (name + prefix + type + ID from
+  al_getnextobjectid, or "not checked"); where to subscribe/extend
+- Project facts: runtime (and any feature that needs a higher one — see al-rules.md
+  "Runtime-Gated Features"); dependencies to add to app.json (name, publisher, appId, version)
 - New fields that flow via `TransferFields`: | Field | ID | Type/Length | Source table | Target tables |
 ## 6. Risks / Assumptions / Open Questions
 - Include DataClassification, permission set impact, upgrade-code needs

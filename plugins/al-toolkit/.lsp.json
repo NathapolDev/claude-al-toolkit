@@ -1,0 +1,9 @@
+{
+  "al": {
+    "command": "${CLAUDE_PLUGIN_ROOT}/scripts/al-lsp.cmd",
+    "extensionToLanguage": {
+      ".al": "al"
+    },
+    "startupTimeout": 120000
+  }
+}
