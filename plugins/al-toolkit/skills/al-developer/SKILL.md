@@ -20,11 +20,15 @@ Full house rules: `${CLAUDE_PLUGIN_ROOT}/references/al-rules.md` (canonical
 1. Read the analysis (or, if none, do a quick feasibility scan first and note that an
    al-analyst pass was skipped).
 2. **Verify feasibility before writing** — confirm objects/fields/methods/event
-   signatures actually exist (use `al_symbolsearch` or the AL LSP, not text grep, for
-   symbols); confirm the event to subscribe to exists and its signature matches; check
+   signatures actually exist (use `al_symbolsearch`, or the `LSP` tool's
+   `goToDefinition` / `findReferences` on `.al` files — this plugin registers the AL
+   language server — not text grep, for symbols); confirm the event to subscribe to exists and its signature matches; check
    app.json dependencies, `idRanges` for new object IDs, and platform/runtime version.
    If the planned approach isn't feasible, say why, pick the best fallback, and explain
    the change.
+   **New object IDs:** use the IDs from the analysis; if it has none, call
+   `al_getnextobjectid` (per object type, `count` for several) before writing the object.
+   It doesn't reserve IDs — write the object before asking again.
 3. Pick the best approach — by maintainability, upgrade safety, performance, simplicity;
    record the reason.
 4. Write the code per the coding standard below.
@@ -32,16 +36,34 @@ Full house rules: `${CLAUDE_PLUGIN_ROOT}/references/al-rules.md` (canonical
    until zero errors and no avoidable warnings.
 6. **Tests — only when the user requests them.** Do not generate test codeunits
    unprompted. Always list concrete test gaps (scenarios worth covering) in the summary
-   so the user can decide.
+   so the user can decide. When tests are requested or already cover the change, **run
+   them** (see Test tooling) and report passed / failed / skipped per test method. If
+   they can't run, report `TESTS NOT RUN` with the reason — never claim they pass.
 7. Summarize what changed, key decisions, and build results; recommend an al-reviewer pass.
 
 ## Build tooling — never guess compile results
 **Primary — AL MCP server (`al` MCP, when connected):** tools are deferred; load them
-first with ToolSearch (`select:al_compile,al_getdiagnostics,al_downloadsymbols,al_symbolsearch`).
-Then: `al_downloadsymbols` (if symbols missing/stale) → `al_compile` (fast, no .app;
-set `enableCodeAnalysis: true` with `codeAnalyzers` = `${CodeCop}` + `${PerTenantExtensionCop}`
-for PTE or `${AppSourceCop}` for AppSource, per app.json `target`) → `al_getdiagnostics`
-→ fix → repeat until clean. Use `al_build` only when a `.app` file is needed.
+first with ToolSearch
+(`select:al_compile,al_getdiagnostics,al_downloadsymbols,al_symbolsearch,al_getnextobjectid,al_addproject,al_getpackagedependencies,al_run_tests`).
+Then:
+1. If any tool answers "No projects are loaded", or the workspace has several projects
+   (e.g. App + Test), call `al_addproject` for each project not yet loaded; pass
+   `projectPath` to every tool that takes it whenever more than one project is loaded.
+2. If compile reports missing symbols / packages (AL1021, AL1022, AL0185 on base objects),
+   run `al_downloadsymbols` before touching code.
+3. `al_compile` (fast, no .app) with `onlyErrors: true` → fix errors → repeat until
+   `succeeded: true` with 0 errors.
+4. Once clean, `al_compile` with `onlyErrors: false`, `enableCodeAnalysis: true`,
+   `codeAnalyzers` = `${CodeCop}` + `${PerTenantExtensionCop}` (PTE) or `${AppSourceCop}`
+   (AppSource) per app.json `target`, and `maxDiagnosticsPerCompilation: 500`. Cop
+   findings appear **only in this compile output** — `al_getdiagnostics` returns compiler
+   diagnostics, not analyzer ones. Fix findings in files you changed. Older projects can
+   have thousands of findings: if the result says "Maximum number of diagnostics
+   reached", don't raise the limit (the response gets too large) — run
+   `al-build.cmd` with `AL_ANALYZERS` set (see Fallback) and keep only the lines for
+   the files you changed, e.g. `| Select-String "<FileName>"`.
+Use `al_getdiagnostics` (`filePath` / `projectPath`) to page through compiler errors on
+large projects. Use `al_build` only when a `.app` file is needed.
 
 **Fallback — if the `al` MCP server is not connected:** build with the bundled script
 `${CLAUDE_PLUGIN_ROOT}/scripts/al-build.cmd "<projectDir>"` (alc.exe; ships with this
@@ -49,14 +71,31 @@ plugin, so it works on every machine). It resolves the AL toolchain itself, prin
 compiler diagnostics, and exits non-zero on failure — read the errors from its output and
 fix until it prints `BUILD OK`. Run code analysis by setting `AL_ANALYZERS` first
 (`CodeCop;PerTenantExtensionCop` for PTE, `CodeCop;AppSourceCop` for AppSource, per
-app.json `target`). If the user has the separate **al-compiler** skill installed, that
-works too. Note: the `al` MCP server is registered by this plugin's `.mcp.json` and
+app.json `target`). Note: the `al` MCP server is registered by this plugin's `.mcp.json` and
 requires an AL toolchain on the machine — the AL Development Tools .NET tool
 (`dotnet tool install -g Microsoft.Dynamics.BusinessCentral.Development.Tools`) or the AL
 Language VS Code extension (`ms-dynamics-smb.al-*`) — plus Claude Code started from the AL project folder; if `al_*` tools are
 missing, tell the user to check `claude mcp list`.
 
 Either way: if you cannot run a real build, do NOT report the task as done — say so.
+
+## Test tooling — never guess test results
+Tests run on a Business Central server against what is **published** there, so the
+changed app and its test app must already be on the target. Don't publish on your own;
+if the user asks, publish only to a Sandbox or container.
+- **Target:** Sandbox or container only. Read `.vscode/launch.json` first; if the
+  configuration has `"environmentType": "Production"`, stop and ask for a sandbox.
+- **Primary — `al_run_tests`:** `codeunitId`, optional `testMethods`, and
+  `projectPath` (launch.json supplies the connection) or `environmentType` +
+  `environmentName`. It can open a Microsoft sign-in the first time.
+- **Fallback — MCP not connected:**
+  `${CLAUDE_PLUGIN_ROOT}/scripts/al-test.cmd "<projectDir>" <codeunitId> [--testmethods A B]`
+  (or `--testgroups <file.json>` for several codeunits). It prints the same JSON and
+  exits 0 when all pass, 1 on any failure or connection problem; it refuses Production.
+- **Reading results:** use `data.results[]` rows that have a `methodName`. The row with an
+  empty `methodName` is the codeunit summary and repeats the outcome, so
+  `data.passed` / `data.failed` count one extra row per codeunit. Quote the failure
+  `output` (message + AL call stack) for each failed method.
 
 ## Coding standard (mandatory)
 - **Formatting:** lowercase keywords; PascalCase built-ins; 4-space indent; braces on a
@@ -76,7 +115,7 @@ Either way: if you cannot run a real build, do NOT report the task as done — s
 - **New page fields/actions:** `ApplicationArea`, `Caption`, and `ToolTip` on every
   user-visible control.
 - **Permissions:** add every new object to the app's permission set object (or create one
-  — see the `bc365-permissionset` skill); a feature nobody can run isn't done.
+  — see this plugin's `bc365-permissionset` skill); a feature nobody can run isn't done.
 - **External calls:** wrap in `[TryFunction]` with proper error handling; never leak raw
   HTTP errors to users.
 - **Upgrade code:** triggers delegate only; guard every Get/Find; always use Upgrade Tags
@@ -100,8 +139,9 @@ Either way: if you cannot run a real build, do NOT report the task as done — s
   clean temp files; no time zone / locale / printer coupling.
 
 ## Event quality & upgrade safety
-- Avoid handled events (prefer skip); verify events create no transactions; module-owned
-  publishers internal. Deprecate with Obsolete (State/Reason/Tag) + preprocessor symbols;
+- Avoid handled events by default; use `IsHandled` only when the requirement needs a
+  subscriber to replace default logic, with the reason in a comment. Verify events create
+  no transactions; module-owned publishers internal. Deprecate with Obsolete (State/Reason/Tag) + preprocessor symbols;
   no breaking changes to public/business events.
 
 ## Output (summary for handoff)
@@ -111,8 +151,10 @@ Either way: if you cannot run a real build, do NOT report the task as done — s
 ## 2. Feasibility confirmed — events/objects/fields verified; all requirements feasible?
 ## 3. Files added/changed — | File | Object | What it does |
 ## 4. Key code (summary) — subscribe/extend points; performance choices
-## 5. Build result — tool used (al_compile / al-build.cmd); PASS/FAIL; 0 errors confirmed
-## 6. Test gaps — scenarios worth testing (tests written only if requested)
+## 5. Build result — tool used (al_compile / al-build.cmd); PASS/FAIL; 0 errors confirmed;
+   analyzers run; object IDs used and where they came from (analysis / al_getnextobjectid)
+## 6. Tests — results per method (al_run_tests / al-test.cmd, target environment) or
+   TESTS NOT RUN + reason; test gaps — scenarios worth testing (tests written only if requested)
 ## 7. Focus areas for review
 ```
 

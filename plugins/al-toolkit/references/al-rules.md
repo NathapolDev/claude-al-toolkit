@@ -13,7 +13,19 @@
 - Keep AL object names within the platform object name limit. When a project uses a 3-character prefix plus a space, keep the base name to 26 characters or less.
 - Use 4-space indentation.
 - Keep procedures small and focused.
-- Organize new files by business feature unless the repo already has a clear different convention.
+- Organize new files by business feature unless the repo already has a clear different convention:
+  ```
+  src/
+  ├── Sales/
+  │   ├── Invoice/
+  │   │   ├── SalesInvoice.Page.al
+  │   │   └── SalesInvoicePosting.Codeunit.al
+  │   └── Order/
+  │       └── SalesOrder.Page.al
+  └── Common/
+      ├── Helpers/
+      └── Interfaces/
+  ```
 - Name files as `<ObjectName>.<ObjectType>.al`, for example `NoSeries.Page.al`, `SalesHeader.TableExt.al`, `INoSeries.Interface.al`, `NoSeriesImpl.Codeunit.al`.
 - Use XML documentation comments for global procedures in codeunits.
 - Avoid comments that describe obvious operations. Use comments to explain why.
@@ -37,6 +49,23 @@
 - Verify a field's `FieldClass` before reading it dynamically. For FlowFields, call `CalcFields` before using or assigning the value.
 - A new field that must flow to another table via `TransferFields` (e.g. Sales Header → Sales Invoice Header, Sales Line → Sales Invoice Line) must exist in every target table extension with the **same field ID, same name, and same data type/length**. `TransferFields` matches by field ID only: a type mismatch errors at runtime (same extension) or is skipped silently (cross-extension), and a same-ID field with a different name receives the wrong data silently; the runtime tolerates only Text↔Code and enum↔enum (copied by ordinal — still require the same enum), and the target length must fit the source value.
 
+```al
+// Good: filter early
+Customer.SetRange(City, CityFilter);
+Customer.SetRange(Blocked, Customer.Blocked::" ");
+if Customer.FindSet() then ...
+
+// Good: SetLoadFields BEFORE SetRange
+Item.SetLoadFields("Item Category Code");
+Item.SetRange("Third Party Item Exists", false);
+Item.FindFirst();
+
+// Good: CalcSums for aggregation
+CustLedgerEntry.SetRange("Customer No.", CustomerNo);
+CustLedgerEntry.CalcSums(Amount);
+exit(CustLedgerEntry.Amount);
+```
+
 ## Error Handling
 
 - Use `Error`, `FieldError`, and `TestField` appropriately for validation.
@@ -46,13 +75,71 @@
 - Use `[TryFunction]` for external calls or operations expected to fail.
 - Prioritize correct business logic. If an event, function, or object name needs verification, leave a clear TODO/comment rather than guessing in a way that changes the intent.
 
+```al
+// Good: Label variables with comments
+var
+  CustomerNotFoundErr: Label 'Customer %1 does not exist for sales document %2.',
+    Comment = '%1 = Customer No., %2 = Sales Header No.';
+
+// Good: TryFunction for external calls
+[TryFunction]
+local procedure TryProcessPaymentInternal(Amount: Decimal)
+begin
+  PaymentService.ProcessPayment(Amount);
+end;
+
+// Good: Locked = true for telemetry
+SalesDocPostedMsg: Label 'Sales document posted successfully', Locked = true;
+```
+
 ## Events
 
 - Subscribe to Business Central events instead of modifying base app objects.
 - Add `[IntegrationEvent]` at meaningful business process points when extensibility is needed.
-- Use the `IsHandled` pattern when subscribers need to override default logic.
+- Avoid handled events by default — they are low quality and don't scale; prefer events that let subscribers add or skip behavior. Use the `IsHandled` pattern (subscribing to one, or publishing one) only when the requirement needs a subscriber to replace the default logic, and state that reason in the design and code.
 - Pass enough context to event subscribers, including identity and date fields where relevant.
 - Pass records by `var` only when subscribers need to modify data.
+
+## Runtime-Gated Features
+
+Read `runtime` (and `application`) in `app.json` before recommending a language feature.
+An extension needs a server that supports its runtime or later, and the compiler doesn't
+check the target server: raising `runtime` compiles fine against older symbols and then
+fails to deploy. Never raise `runtime` to unlock a feature without confirming every target
+environment's version.
+
+| `runtime` | Business Central | Release |
+|---|---|---|
+| 16.0 | 27.0 | 2025 release wave 2 |
+| 17.0 | 28.0 | 2026 release wave 1 |
+| 18.0 | 29.0 | 2026 release wave 2 |
+
+For a platform not in the table, check with
+`altool GetLatestSupportedRuntimeVersion <platformVersion>` (the 30.0 beta toolchain
+reports runtime 30.0 for platform 30.0; Microsoft Learn doesn't list it yet).
+
+**Runtime 18.0+ — default interface methods:**
+- An interface method may have a body; implementing codeunits may omit it. Below 18.0
+  the compiler rejects it (`AL0413: Procedure cannot have a body`).
+- Default methods dispatch only through an `Interface` variable, not through the
+  implementing codeunit's own variable.
+- Adding a default method to a published interface is non-breaking. Making it required is
+  two-phase: first mark it `[RequiredPending('<reason>', '<tag>')]` (implementors get
+  `AL0924`), and only in a later major version remove the body and the attribute
+  (`AS0149` warns about the runtime identifier change). Removing the body directly is
+  `AS0148` (error). `[RequiredPending]` on a method without a body is `AL0923`.
+
+```al
+interface "BPC IPaymentMethod"
+{
+    procedure ValidateAmount(Amount: Decimal): Boolean;   // required
+
+    procedure GetTransactionFee(): Decimal                // default, runtime 18.0+
+    begin
+        exit(0);
+    end;
+}
+```
 
 ## APIs And Integrations
 
@@ -88,71 +175,6 @@
 - Add upgrade code for new fields whose existing records need a value different from the datatype default; `InitValue` only affects new records.
 - If code must skip behavior during `ExecutionContext::Upgrade`, include a comment explaining why.
 - Prefer telemetry logging over throwing errors from upgrade code where recovery is possible.
-
-## Vibe Coding Rules (AL Community Standard)
-
-> Source: alguidelines.dev/docs/agentic-coding/vibe-coding-rules/
-
-### Code Style & Formatting
-
-- PascalCase for all variable names, function names, and object names.
-- 4-space indentation consistently.
-- Keep procedures small and focused — one procedure, one concern.
-- Organize files by business feature:
-  ```
-  src/
-  ├── Sales/
-  │   ├── Invoice/
-  │   │   ├── SalesInvoice.Page.al
-  │   │   └── SalesInvoicePosting.Codeunit.al
-  │   └── Order/
-  │       └── SalesOrder.Page.al
-  └── Common/
-      ├── Helpers/
-      └── Interfaces/
-  ```
-- XML documentation comments on all global procedures.
-- Comments explain WHY, not WHAT.
-
-### Performance Patterns
-
-```al
-// Good: filter early
-Customer.SetRange(City, CityFilter);
-Customer.SetRange(Blocked, Customer.Blocked::" ");
-if Customer.FindSet() then ...
-
-// Good: SetLoadFields BEFORE SetRange
-Item.SetLoadFields("Item Category Code");
-Item.SetRange("Third Party Item Exists", false);
-Item.FindFirst();
-
-// Good: CalcSums for aggregation
-CustLedgerEntry.SetRange("Customer No.", CustomerNo);
-CustLedgerEntry.CalcSums(Amount);
-exit(CustLedgerEntry.Amount);
-```
-
-### Error Handling
-
-```al
-// Good: Label variables with comments
-var
-  CustomerNotFoundErr: Label 'Customer %1 does not exist for sales document %2.',
-    Comment = '%1 = Customer No., %2 = Sales Header No.';
-
-// Good: TryFunction for external calls
-[TryFunction]
-local procedure TryProcessPaymentInternal(Amount: Decimal)
-begin
-  PaymentService.ProcessPayment(Amount);
-end;
-
-// Good: Locked = true for telemetry
-SalesDocPostedMsg: Label 'Sales document posted successfully', Locked = true;
-```
-
-### Upgrade Code Rules
 
 ```al
 // Good: delegate from trigger
@@ -200,7 +222,7 @@ if MyTable.FindSet() then
 | 13 | `Locked = true` for telemetry labels | Error Handling |
 | 14 | Event subscribers instead of base app edits | Events |
 | 15 | Integration events at meaningful extension points | Events |
-| 16 | `IsHandled` pattern where override is intended | Events |
+| 16 | Handled events avoided; `IsHandled` only where replacing default logic is required and justified | Events |
 | 17 | Subscriber-only codeunits use `Handler` suffix | Events |
 | 18 | Test files only in Test project | Testing |
 | 19 | Given/When/Then test names | Testing |
@@ -211,3 +233,5 @@ if MyTable.FindSet() then
 | 24 | DataTransfer for large table upgrades | Upgrade |
 | 25 | New `InitValue` fields have upgrade code when needed | Upgrade |
 | 26 | Fields flowing via `TransferFields` match ID, name, and data type in every target table | Data |
+| 27 | Language features used are supported by `app.json` `runtime`; `runtime` not raised beyond the target environments | Runtime |
+| 28 | Interface default methods made required only via `[RequiredPending]` first | Runtime |

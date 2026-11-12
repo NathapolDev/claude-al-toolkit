@@ -7,8 +7,13 @@ at every stage that produces code.
 
 | Component | What it does |
 |---|---|
-| **`al` MCP server** | Launches Microsoft's AL MCP server (`altool.exe launchmcpserver`) from the standalone AL Development Tools .NET tool or the AL Language VS Code extension. Gives Claude `al_compile`, `al_getdiagnostics`, `al_symbolsearch`, `al_downloadsymbols`, `al_build`, `al_publish`, `al_run_tests`. Resolves the toolchain at every launch, so tool/extension updates never break it. |
-| **`al-build.cmd`** | Bundled `alc.exe` build fallback, used when the MCP server isn't connected — so every machine has a real build path. |
+| **`al` MCP server** | Launches Microsoft's AL MCP server (`altool.exe launchmcpserver`) from the standalone AL Development Tools .NET tool or the AL Language VS Code extension. Gives Claude 16 tools — build: `al_compile`, `al_build`, `al_getdiagnostics`, `al_downloadsymbols`; symbols: `al_symbolsearch`, `al_symbolrelations`, `al_getnextobjectid`, `al_getpackagedependencies`, `al_inspectpage`; workspace: `al_addproject`; environment: `al_publish`, `al_run_tests`, `al_auth_login`, `al_auth_logout`; translation: `al_searchtranslations`, `al_writetranslation`. Resolves the toolchain at every launch, so tool/extension updates never break it. |
+| **AL language server** (`.lsp.json`) | Registers Microsoft's AL LSP (`altool.exe launchlspserver`) for `.al` files, so Claude gets the `LSP` tool: go to definition and find references by symbol instead of text search. |
+| **`al-build.cmd`** | Bundled `alc.exe` build fallback, used when the MCP server isn't connected — so every machine has a real build path. Replaces the old standalone `al-compiler` skill. |
+| **`al-test.cmd`** | Bundled `altool runtests` fallback for running AL tests on a sandbox or container when the MCP server isn't connected. Refuses Production. |
+| **`al-graph.cmd`** | Call-graph questions ("who calls this procedure?") via `altool graph`, used by `al-analyst` and `al-reviewer` for impact checks. Builds the graph in `%TEMP%` and deletes it. |
+| **`al-debugger`** / **`al-profiler`** skills | Opt-in: snapshot debugging and performance profiling on a Business Central environment through Microsoft's MCP proxies (`scripts/al-diag-mcp.cmd`), added per machine — see "Opt-in: snapshot debugging and profiling". Outside the analyst → developer → reviewer pipeline. |
+| **`bc365-permissionset`** skill | Create/analyze permission sets: import-ready tenant XML and AL `permissionset` objects. Python 3 (standard library only). |
 | **`al-analyst`** skill | Analyze a requirement → Solution Design comparing options. Read-only, writes no code. |
 | **`al-developer`** skill | Implement AL code, build until zero diagnostics. |
 | **`al-reviewer`** skill | Review AL code, independently re-verify the build, Approve / Request Changes. Read-only, edits nothing. |
@@ -84,9 +89,12 @@ setx AL_EXTENSIONS_DIR "D:\vscode-extensions"
 |---|---|---|
 | `AL_BIN` | Folder containing `altool.exe` / `alc.exe` | auto-resolved |
 | `AL_EXTENSIONS_DIR` | VS Code extensions root | auto-resolved |
-| `AL_PROJECT_DIR` | Project handed to the MCP server | folder Claude Code started in |
-| `AL_PACKAGECACHE` | Symbol folder for `al-build.cmd` | `<project>\.alpackages` |
-| `AL_ANALYZERS` | Semicolon list of cops for `al-build.cmd` | none |
+| `AL_PROJECT_DIR` | Project handed to the MCP server; skipped when it has no `app.json` (add one later with `al_addproject`) | folder Claude Code started in |
+| `AL_PACKAGECACHE` | Symbol folder for the MCP server and `al-build.cmd` | `<project>\.alpackages` |
+| `AL_ANALYZERS` | Semicolon list of cops (`CodeCop;PerTenantExtensionCop`) for the MCP server and `al-build.cmd` | none |
+| `AL_RULESET` | Ruleset file for the MCP server and `al-build.cmd`; on the MCP server it only matters when `AL_ANALYZERS` is set | none |
+| `AL_MCP_LOGLEVEL` | MCP server log level: `Debug`, `Verbose`, `Normal`, `Warning`, `Error` | `Normal` |
+| `AL_MCP_LOGFILE` | MCP server log file | `%LOCALAPPDATA%\Microsoft\ALLanguageServer\almcp.log` |
 
 ---
 
@@ -214,9 +222,10 @@ before I merge", "is this codeunit safe".
 /bc365-al-toolkit:al-reviewer Review the changes in src/PurchaseApproval/.
 ```
 
-**What it does:** checks requirement coverage, reads the changed code against a nine-part
-checklist (requirement, coding standard, architecture, performance, event quality,
-compliance/security, data & UX correctness, upgrade safety, build & tests), and — this is
+**What it does:** checks requirement coverage, reads the changed code against an
+twelve-part checklist (requirement, coding standard, architecture, performance, event
+quality, compliance/security, data & UX correctness, upgrade safety, `TransferFields`
+mapping, runtime fit, callers of changed signatures, build & tests), and — this is
 the point — **re-runs the build itself** rather than trusting the developer's report. If it
 cannot run any build, it marks the build check NOT VERIFIED instead of assuming.
 
@@ -253,8 +262,53 @@ plugins\al-toolkit\scripts\al-build.cmd "C:\path\to\AlProject"
 
 It prints the compiler diagnostics, then `BUILD OK` (exit 0) or `BUILD FAILED` (exit 1).
 
+**Whole workspace (App + Test):** point it at the folder that holds the `.code-workspace`.
+When that folder also has a shared symbol cache (`.alpackages`, or `AL_PACKAGECACHE`) and
+the toolchain has `altool workspace compile`, every project is built in one run and the
+second argument becomes an output *folder*. Without a shared cache it falls back to
+`alc.exe` on that one folder and says why.
+
+### Running tests without the MCP server
+
+```powershell
+plugins\al-toolkit\scripts\al-test.cmd "C:\path\to\TestProject" 50150
+plugins\al-toolkit\scripts\al-test.cmd "C:\path\to\TestProject" 50150 --testmethods MyTest
+plugins\al-toolkit\scripts\al-test.cmd "C:\path\to\TestProject" 50150 --environmenttype Sandbox --environmentname Develop
+```
+
+It passes everything after the project folder to `altool runtests`, uses the project's
+`launch.json` for the connection, prints the JSON result, and exits 0 when all tests pass,
+1 otherwise. Tests run against the apps already published on that environment. It refuses
+to run when the target is Production or can't be determined. In the result, ignore the
+row with an empty `methodName` — it's the codeunit summary.
+
 > **Why the wrapper exists:** `alc.exe` exits 0 even when compilation fails. Never call
 > `alc.exe` directly and trust its exit code — `al-build.cmd` grades the output for you.
+
+### Opt-in: snapshot debugging and profiling
+
+The `al-debugger` and `al-profiler` skills use Microsoft's snapshot debugging and
+performance profiling MCP proxies. They connect to a Business Central environment and can
+capture business data, so the plugin doesn't register them. Add the ones you want, once
+per machine, pointing at a **sandbox** unless you mean production:
+
+```powershell
+# where the installed plugin lives (local-folder installs report readFromFolder)
+$p = claude plugin list --json | ConvertFrom-Json | Where-Object id -like 'bc365-al-toolkit@*'
+$root = if ($p.readFromFolder) { $p.readFromFolder } else { $p.installPath }
+
+claude mcp add al-snapshot  -e AL_ENV_TYPE=Sandbox -e AL_ENV_NAME=Develop -- "$root\scripts\al-diag-mcp.cmd" snapshot
+claude mcp add al-profiling -e AL_ENV_TYPE=Sandbox -e AL_ENV_NAME=Develop -- "$root\scripts\al-diag-mcp.cmd" profiling
+```
+
+- `AL_ENV_TYPE` is required (`Sandbox`, `Production`, or `OnPrem`); the launcher refuses
+  to start without it because the proxies default to Production. Add `-e AL_TENANT=...`
+  for a specific tenant. For on-prem, append altool options after the mode, e.g.
+  `profiling --server http://bc --serverinstance BC --port 7047` (the API/OData port, not
+  the dev port).
+- Sign in once with `altool auth login` or let the first tool call open the sign-in.
+- `installPath` contains the plugin version, so re-run the `claude mcp add` lines after
+  a plugin update (git installs); remove with `claude mcp remove al-snapshot`.
 
 ---
 
@@ -283,6 +337,8 @@ After changing skills or rules here:
 | `error AL1021: The package cache path has not been specified` | No `.alpackages` in the project — download symbols first (`al_downloadsymbols`, or AL: Download Symbols in VS Code). |
 | `error AL1022: … could not be found in the package cache` | Symbols are missing or stale for the `application` / `platform` version in `app.json`. |
 | Skills load but every build is "NOT VERIFIED" | Claude Code wasn't started inside the AL project folder, or no symbols are present. |
+| `al_compile` says "No projects are loaded" | Claude Code was started outside an AL project. Ask Claude to call `al_addproject` with the project folder, or restart Claude Code inside it. |
+| `al_*` tools misbehave | Set `AL_MCP_LOGLEVEL=Debug`, restart Claude Code, and read `%LOCALAPPDATA%\Microsoft\ALLanguageServer\almcp.log` (or `AL_MCP_LOGFILE`). |
 
 Contributor notes — repo layout, invariants, and how to verify changes — are in
 [`CLAUDE.md`](CLAUDE.md).
