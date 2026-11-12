@@ -208,7 +208,8 @@ def build_xml(spec: dict[str, Any]) -> str:
     role_id_input = str(spec.get("role_id", spec.get("RoleID", role_name))).strip()
     role_id = normalize_role_id(role_id_input)
     assignable = "Yes" if spec.get("assignable", True) not in (False, "No", "no", "false", "False", 0) else "No"
-    allow_sensitive = bool(spec.get("allow_sensitive_security_permissions", False))
+    # Strict opt-in: bool("false") is True, so only explicit true values unlock the guard.
+    allow_sensitive = spec.get("allow_sensitive_security_permissions", False) in (True, "true", "True", "yes", "Yes")
 
     includes = normalize_includes(spec)
     permissions = normalize_permissions(spec, allow_sensitive)

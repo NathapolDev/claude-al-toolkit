@@ -119,7 +119,7 @@ def create_xml(role_id, role_name, include_system_roles, object_permissions, out
     if include_system_roles:
         roles = [r.strip() for r in include_system_roles.split(",") if r.strip()]
         for role in roles:
-            app_id = SYSTEM_APP_ID if role == "LOGIN" else BASE_APP_ID
+            app_id = SYSTEM_APP_ID if role.upper() in ("LOGIN", "SYSTEM APP - BASIC") else BASE_APP_ID
             rel = ET.SubElement(tps, "TenantPermissionSetRel")
             ET.SubElement(rel, "ObjectType").text = "Include"
             ET.SubElement(rel, "ObjectRelatedScope").text = "System"
