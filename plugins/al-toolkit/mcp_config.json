@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "al": {
+      "command": "D:/claude-al-toolkit/plugins/al-toolkit/scripts/al-mcp.cmd",
+      "args": []
+    },
+    "al-lsp": {
+      "command": "D:/claude-al-toolkit/plugins/al-toolkit/scripts/al-lsp-mcp.cmd",
+      "args": []
+    }
+  }
+}

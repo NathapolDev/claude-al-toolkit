@@ -12,13 +12,37 @@ This skill is outside the analyst → developer → reviewer pipeline; those ski
 call it.
 
 ## Prerequisite — the `al-snapshot` MCP server
-Load its tools with ToolSearch
+In Antigravity (`agy`), call these tools via `call_mcp_tool` on server `al-snapshot` (or
+directly if injected into your toolset); in Claude Code, load them first with
+`ToolSearch`
 (`select:initialize_snapshot_debugging,get_snapshot_status,stop_snapshot_debugging,run_tests`).
 If they don't exist, stop and tell the user to add the server once (README section
-"Opt-in: snapshot debugging and profiling"):
+"Opt-in: snapshot debugging and profiling"), resolving `../../scripts/al-diag-mcp.cmd`
+relative to the directory containing this loaded `SKILL.md` file (or from
+`${CLAUDE_PLUGIN_ROOT}` in Claude Code):
+
+**Antigravity (`~/.gemini/config/mcp_config.json`):** replace `<resolved-path-to>` with
+the absolute path to this plugin's folder (forward slashes, no env var placeholders):
+
+```json
+{
+  "mcpServers": {
+    "al-snapshot": {
+      "command": "<resolved-path-to>/scripts/al-diag-mcp.cmd",
+      "args": ["snapshot"],
+      "env": {
+        "AL_ENV_TYPE": "Sandbox",
+        "AL_ENV_NAME": "<env>"
+      }
+    }
+  }
+}
+```
+
+**Claude Code:**
 
 ```powershell
-claude mcp add al-snapshot -e AL_ENV_TYPE=Sandbox -e AL_ENV_NAME=<environment> -- "<plugin root>\scripts\al-diag-mcp.cmd" snapshot
+claude mcp add al-snapshot -e AL_ENV_TYPE=Sandbox -e AL_ENV_NAME=<env> -- "<resolved-path-to>\scripts\al-diag-mcp.cmd" snapshot
 ```
 
 The first call can open a Microsoft sign-in.
@@ -30,7 +54,12 @@ The first call can open a Microsoft sign-in.
 - **Verbosity:** `SnapPoint` (default). Use `Full` only for a short, targeted repro and
   say why — it materially increases server CPU, memory, disk, and archive size.
 - **Snappoints:** object type, object ID or name, and 1-based line numbers where state
-  matters. Verify those lines in the source (LSP `goToDefinition` or Read) before arming.
+  matters. Verify those lines in the source before arming using the `al-lsp` MCP server
+  tools (`al_lsp_definition`, `al_lsp_references`, `al_lsp_hover`,
+  `al_lsp_document_symbols`, `al_lsp_workspace_symbols`, `al_lsp_signature_help`,
+  `al_lsp_rename_preview` via `call_mcp_tool` on `al-lsp`, or CLI fallback
+  `../../scripts/al-lsp-mcp.cmd --cli <tool_name> "<json>"`; in Claude Code, the `LSP`
+  tool's `goToDefinition`) or `read_file` / `Read`.
 
 ## Workflow
 1. `initialize_snapshot_debugging` — omit `sessionId` to arm and wait for the next

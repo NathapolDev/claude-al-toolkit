@@ -11,7 +11,7 @@ description: Create, analyze, and manage Microsoft Dynamics 365 Business Central
 2. Prefer including existing system permission sets over listing many object permissions manually.
 3. Start every importable tenant permission set with `LOGIN` unless the user gives a complete alternative.
 4. Add direct object permissions only for gaps that included sets do not cover.
-5. Use `generate_permission_xml.py` (JSON-spec-driven) for validated XML generation, or `bc365_permission_creator.py` (CLI-driven) for quick create/analyze. Both live in `${CLAUDE_PLUGIN_ROOT}/skills/bc365-permissionset/scripts/` and need only Python 3 (standard library); run them with `python` or `uv run python`.
+5. Use `generate_permission_xml.py` (JSON-spec-driven) for validated XML generation, or `bc365_permission_creator.py` (CLI-driven) for quick create/analyze. Both live in `./scripts/` (resolve relative `./` paths from the directory containing this loaded `SKILL.md` file, which sits at `skills/bc365-permissionset/` under `${CLAUDE_PLUGIN_ROOT}` in Claude Code) and need only Python 3 (standard library); run them with `python` or `uv run python`.
 6. Parse the XML result before delivering it.
 7. Tell the user that duplicate Role IDs during import depend on the BC import choice: update/merge or skip.
 
@@ -31,7 +31,7 @@ description: Create, analyze, and manage Microsoft Dynamics 365 Business Central
 </PermissionSets>
 ```
 
-For full schema details and examples, read `${CLAUDE_PLUGIN_ROOT}/skills/bc365-permissionset/references/permission_xml.md`.
+For full schema details and examples, read `./references/permission_xml.md`.
 
 ## Guardrails
 
@@ -50,7 +50,7 @@ For full schema details and examples, read `${CLAUDE_PLUGIN_ROOT}/skills/bc365-p
 
 ## Utility Scripts
 
-`<scripts>` below is `${CLAUDE_PLUGIN_ROOT}/skills/bc365-permissionset/scripts`.
+`<scripts>` below is `./scripts` (relative to the directory containing this loaded `SKILL.md` file).
 
 ### 1. Generate XML from JSON spec (validated)
 ```bash
@@ -83,12 +83,13 @@ python "<scripts>/bc365_permission_creator.py" create-xml --role-id "MY_ROLE" --
 python "<scripts>/bc365_permission_creator.py" create-al --role-id "MY_ROLE" --role-name "My Role" --include-system-roles "LOGIN,D365 BASIC" --object-id 77001 --output "MyRole.permissionset.al"
 ```
 Get `--object-id` from `al_getnextobjectid` (`objectType: "PermissionSet"`) when the AL MCP
-server is connected; otherwise pick a free ID inside `app.json` `idRanges`. Without it the
-script uses 50100, which is outside most apps' ranges.
+server is connected (in Antigravity via `call_mcp_tool` on server `al` (or `al-mcp`), or
+directly if injected; in Claude Code via `ToolSearch`); otherwise pick a free ID inside
+`app.json` `idRanges`. Without it the script uses 50100, which is outside most apps' ranges.
 
 ## Reference Data
 
-Use `${CLAUDE_PLUGIN_ROOT}/skills/bc365-permissionset/references/BC365_PermissionSets_Summary.csv` for Role ID, Role Name, Source, and Thai descriptions (exported from BC 28).
+Use `./references/BC365_PermissionSets_Summary.csv` for Role ID, Role Name, Source, and Thai descriptions (exported from BC 28).
 
 If the user provides full exports from their own tenant (for example `SystemPermissionSets.xml` for standard sets and app IDs, or `UserDefinedPermissionSets.xml` for existing tenant sets), prefer them over the bundled summary.
 

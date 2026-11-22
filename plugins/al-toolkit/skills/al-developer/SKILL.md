@@ -13,16 +13,21 @@ ensure the code compiles cleanly with zero diagnostics before declaring done.
 
 Follow the official Microsoft AL guidelines and
 https://alguidelines.dev/docs/bestpractices/ (including the "Vibe Coding Rules for AL").
-Full house rules: `${CLAUDE_PLUGIN_ROOT}/references/al-rules.md` (canonical
-— read it when in doubt instead of guessing).
+Full house rules: `../../references/al-rules.md` (canonical — read it when in doubt
+instead of guessing; resolve relative `../../` paths from the directory containing this
+loaded `SKILL.md` file, or from `${CLAUDE_PLUGIN_ROOT}` in Claude Code).
 
 ## Workflow
 1. Read the analysis (or, if none, do a quick feasibility scan first and note that an
    al-analyst pass was skipped).
 2. **Verify feasibility before writing** — confirm objects/fields/methods/event
-   signatures actually exist (use `al_symbolsearch`, or the `LSP` tool's
-   `goToDefinition` / `findReferences` on `.al` files — this plugin registers the AL
-   language server — not text grep, for symbols); confirm the event to subscribe to exists and its signature matches; check
+   signatures actually exist using `al_symbolsearch` (AL MCP) or the `al-lsp` MCP server
+   tools (`al_lsp_definition`, `al_lsp_references`, `al_lsp_hover`,
+   `al_lsp_document_symbols`, `al_lsp_workspace_symbols`, `al_lsp_signature_help`,
+   `al_lsp_rename_preview` — in Antigravity via `call_mcp_tool` on server `al-lsp`, or
+   CLI fallback `../../scripts/al-lsp-mcp.cmd --cli <tool_name> "<json>"`; in Claude
+   Code, the `LSP` tool's `goToDefinition` / `findReferences` on `.al` files — not text
+   grep, for symbols); confirm the event to subscribe to exists and its signature matches; check
    app.json dependencies, `idRanges` for new object IDs, and platform/runtime version.
    If the planned approach isn't feasible, say why, pick the best fallback, and explain
    the change.
@@ -42,8 +47,9 @@ Full house rules: `${CLAUDE_PLUGIN_ROOT}/references/al-rules.md` (canonical
 7. Summarize what changed, key decisions, and build results; recommend an al-reviewer pass.
 
 ## Build tooling — never guess compile results
-**Primary — AL MCP server (`al` MCP, when connected):** tools are deferred; load them
-first with ToolSearch
+**Primary — AL MCP server (`al` MCP, when connected):** in Antigravity (`agy`), call tools
+via `call_mcp_tool` on server `al` (or `al-mcp`), or directly if injected into your
+toolset; in Claude Code, tools are deferred so load them first with `ToolSearch`
 (`select:al_compile,al_getdiagnostics,al_downloadsymbols,al_symbolsearch,al_getnextobjectid,al_addproject,al_getpackagedependencies,al_run_tests`).
 Then:
 1. If any tool answers "No projects are loaded", or the workspace has several projects
@@ -66,16 +72,19 @@ Use `al_getdiagnostics` (`filePath` / `projectPath`) to page through compiler er
 large projects. Use `al_build` only when a `.app` file is needed.
 
 **Fallback — if the `al` MCP server is not connected:** build with the bundled script
-`${CLAUDE_PLUGIN_ROOT}/scripts/al-build.cmd "<projectDir>"` (alc.exe; ships with this
+`../../scripts/al-build.cmd "<projectDir>"` (alc.exe; ships with this
 plugin, so it works on every machine). It resolves the AL toolchain itself, prints the
 compiler diagnostics, and exits non-zero on failure — read the errors from its output and
 fix until it prints `BUILD OK`. Run code analysis by setting `AL_ANALYZERS` first
 (`CodeCop;PerTenantExtensionCop` for PTE, `CodeCop;AppSourceCop` for AppSource, per
-app.json `target`). Note: the `al` MCP server is registered by this plugin's `.mcp.json` and
-requires an AL toolchain on the machine — the AL Development Tools .NET tool
+app.json `target`). Note: the `al` MCP server is registered by this plugin's
+`mcp_config.json` (Antigravity) and `.mcp.json` (Claude Code) and requires an AL
+toolchain on the machine — the AL Development Tools .NET tool
 (`dotnet tool install -g Microsoft.Dynamics.BusinessCentral.Development.Tools`) or the AL
-Language VS Code extension (`ms-dynamics-smb.al-*`) — plus Claude Code started from the AL project folder; if `al_*` tools are
-missing, tell the user to check `claude mcp list`.
+Language VS Code extension (`ms-dynamics-smb.al-*`). In Antigravity, check **Additional
+Options (...) > MCP Servers** (and call `al_addproject` if no project was loaded at
+startup); in Claude Code, start from the AL project folder and check `claude mcp list` if
+`al_*` tools are missing.
 
 Either way: if you cannot run a real build, do NOT report the task as done — say so.
 
@@ -85,11 +94,12 @@ changed app and its test app must already be on the target. Don't publish on you
 if the user asks, publish only to a Sandbox or container.
 - **Target:** Sandbox or container only. Read `.vscode/launch.json` first; if the
   configuration has `"environmentType": "Production"`, stop and ask for a sandbox.
-- **Primary — `al_run_tests`:** `codeunitId`, optional `testMethods`, and
-  `projectPath` (launch.json supplies the connection) or `environmentType` +
-  `environmentName`. It can open a Microsoft sign-in the first time.
+- **Primary — `al_run_tests`:** on the `al` (or `al-mcp`) MCP server (via `call_mcp_tool`
+  in Antigravity, or `ToolSearch` in Claude Code) with `codeunitId`, optional
+  `testMethods`, and `projectPath` (launch.json supplies the connection) or
+  `environmentType` + `environmentName`. It can open a Microsoft sign-in the first time.
 - **Fallback — MCP not connected:**
-  `${CLAUDE_PLUGIN_ROOT}/scripts/al-test.cmd "<projectDir>" <codeunitId> [--testmethods A B]`
+  `../../scripts/al-test.cmd "<projectDir>" <codeunitId> [--testmethods A B]`
   (or `--testgroups <file.json>` for several codeunits). It prints the same JSON and
   exits 0 when all pass, 1 on any failure or connection problem; it refuses Production.
 - **Reading results:** use `data.results[]` rows that have a `methodName`. The row with an
@@ -163,7 +173,7 @@ if the user asks, publish only to a Sandbox or container.
 - When implementation is ready, recommend reviewing it with the **al-reviewer** skill.
 
 ## Reference
-- Canonical house rules: `${CLAUDE_PLUGIN_ROOT}/references/al-rules.md`
+- Canonical house rules: `../../references/al-rules.md` (relative to this `SKILL.md` directory)
 - AL Best Practices: https://alguidelines.dev/docs/bestpractices/
 - Design Patterns: https://alguidelines.dev/docs/patterns/
 - Vibe Coding Rules for AL: https://alguidelines.dev/docs/agentic-coding/vibe-coding-rules/

@@ -13,7 +13,9 @@ an Analysis / Solution Design that the al-developer skill can implement directly
 Ground every decision in the official Microsoft AL guidelines and
 https://alguidelines.dev/docs/bestpractices/ and https://alguidelines.dev/docs/patterns/.
 For the full house coding rules, see
-`${CLAUDE_PLUGIN_ROOT}/references/al-rules.md` (canonical).
+`../../references/al-rules.md` (canonical — resolve relative `../../` paths from the
+directory containing this loaded `SKILL.md` file, or from `${CLAUDE_PLUGIN_ROOT}` in
+Claude Code).
 
 ## Workflow
 1. **Understand the requirement** — restate the business + functional intent; identify
@@ -22,8 +24,10 @@ For the full house coding rules, see
    namespace, team prefix/affix. Read `app.json`: `idRanges` (new object IDs must fit),
    `target` (PTE → PerTenantExtensionCop rules; AppSource → AppSourceCop rules incl.
    affix), and platform/`runtime` version (limits available AL features). Get the
-   resolved dependencies with `al_getpackagedependencies` (AL MCP, when connected — load
-   tools via ToolSearch `select:al_symbolsearch,al_getpackagedependencies,al_getnextobjectid,al_addproject`)
+   resolved dependencies with `al_getpackagedependencies` (AL MCP, when connected — in
+   Antigravity call tools via `call_mcp_tool` on server `al` (or `al-mcp`), or directly
+   if injected; in Claude Code load via `ToolSearch` with
+   `select:al_symbolsearch,al_getpackagedependencies,al_getnextobjectid,al_addproject`)
    rather than trusting `app.json` alone. If a tool answers "No projects are loaded", call
    `al_addproject` with the project folder first.
 3. **Find extension points** — available IntegrationEvent / BusinessEvent publishers,
@@ -35,6 +39,12 @@ For the full house coding rules, see
      This can open a Microsoft sign-in, so tell the user before calling it. Record the
      owning app's `appId` / `appName` / `appPublisher` / `appVersion` — it becomes a
      dependency to add to `app.json`.
+   - `al-lsp` MCP server tools (`al_lsp_definition`, `al_lsp_references`, `al_lsp_hover`,
+     `al_lsp_document_symbols`, `al_lsp_workspace_symbols`, `al_lsp_signature_help`,
+     `al_lsp_rename_preview` — in Antigravity via `call_mcp_tool` on server `al-lsp`, or
+     CLI fallback `../../scripts/al-lsp-mcp.cmd --cli <tool_name> "<json>"`; in Claude
+     Code, use the `LSP` tool) to inspect exact symbol definitions, signatures, and usages
+     in `.al` files.
    - Microsoft Learn MCP (`microsoft_docs_search` / `microsoft_docs_fetch`) to confirm
      base-app events, APIs, and platform behavior.
    - If neither can confirm, recommend the user verify via Event Recorder / AL Explorer
@@ -52,15 +62,16 @@ For the full house coding rules, see
      plugin's `bc365-permissionset` skill for creation/analysis.
    - **Upgrade** — schema changes to existing data need upgrade code with Upgrade Tags.
    - **Callers of changed procedures** — when the design changes an existing procedure's
-     signature or behavior, list its callers with
-     `${CLAUDE_PLUGIN_ROOT}/scripts/al-graph.cmd "<projectOrWorkspaceDir>" --to "obj:<Object Name>#<Procedure>" --direction callers`.
-     Selectors use object **names** (`obj:<ID>` and `Object.Procedure` silently match
+     signature or behavior, list its callers with `al_lsp_references` (or CLI fallback
+     `../../scripts/al-lsp-mcp.cmd --cli al_lsp_references "<json>"`) and/or
+     `../../scripts/al-graph.cmd "<projectOrWorkspaceDir>" --to "obj:<Object Name>#<Procedure>" --direction callers`.
+     `al-graph.cmd` selectors use object **names** (`obj:<ID>` and `Object.Procedure` silently match
      nothing). It sees only source under that folder — callers in other apps or the base
      app are invisible — and `--paths` output is capped, so "0 callers" is evidence, not
      proof: confirm the selector with `--from "obj:<Object Name>"` first.
    - **TransferFields flow** — for each new field, find whether its table is copied to
      other tables with `TransferFields` (posting, archiving, copy-document; verify with
-     `al_symbolsearch` / MS Learn). List every target table; the field must be added to
+     `al_symbolsearch` / `al_lsp_references` / MS Learn). List every target table; the field must be added to
      each with the same ID, name, and data type/length.
 6. **Deliver** the analysis in the format below.
 
@@ -120,6 +131,6 @@ For the full house coding rules, see
   **al-developer** skill.
 
 ## Reference
-- Canonical house rules: `${CLAUDE_PLUGIN_ROOT}/references/al-rules.md`
+- Canonical house rules: `../../references/al-rules.md` (relative to this `SKILL.md` directory)
 - AL Best Practices: https://alguidelines.dev/docs/bestpractices/
 - Design Patterns: https://alguidelines.dev/docs/patterns/

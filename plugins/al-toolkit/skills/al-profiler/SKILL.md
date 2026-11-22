@@ -11,13 +11,37 @@ report the hot spots and hand fixes to **al-developer**. This skill is outside t
 analyst → developer → reviewer pipeline; those skills never call it.
 
 ## Prerequisite — the `al-profiling` MCP server
-Load its tools with ToolSearch
+In Antigravity (`agy`), call these tools via `call_mcp_tool` on server `al-profiling`
+(or directly if injected into your toolset); in Claude Code, load them first with
+`ToolSearch`
 (`select:schedule_profiling,stop_schedule_and_get_profiles,get_profile_for_activity,analyze_profiles_in_folder`).
 If they don't exist, stop and tell the user to add the server once (README section
-"Opt-in: snapshot debugging and profiling"):
+"Opt-in: snapshot debugging and profiling"), resolving `../../scripts/al-diag-mcp.cmd`
+relative to the directory containing this loaded `SKILL.md` file (or from
+`${CLAUDE_PLUGIN_ROOT}` in Claude Code):
+
+**Antigravity (`~/.gemini/config/mcp_config.json`):** replace `<resolved-path-to>` with
+the absolute path to this plugin's folder (forward slashes, no env var placeholders):
+
+```json
+{
+  "mcpServers": {
+    "al-profiling": {
+      "command": "<resolved-path-to>/scripts/al-diag-mcp.cmd",
+      "args": ["profiling"],
+      "env": {
+        "AL_ENV_TYPE": "Sandbox",
+        "AL_ENV_NAME": "<env>"
+      }
+    }
+  }
+}
+```
+
+**Claude Code:**
 
 ```powershell
-claude mcp add al-profiling -e AL_ENV_TYPE=Sandbox -e AL_ENV_NAME=<environment> -- "<plugin root>\scripts\al-diag-mcp.cmd" profiling
+claude mcp add al-profiling -e AL_ENV_TYPE=Sandbox -e AL_ENV_NAME=<env> -- "<resolved-path-to>\scripts\al-diag-mcp.cmd" profiling
 ```
 
 Profiles the user already has (`.alcpuprofile` or a `.zip` of them) need no environment:
@@ -40,7 +64,8 @@ Profiles the user already has (`.alcpuprofile` or a `.zip` of them) need no envi
    decode the archive, aggregate self/total time per call frame, and read the activity
    overview (durations, SQL count/time, HTTP count/time). Never load raw profile JSON
    into context. Use `get_profile_for_activity` to drill into one activity.
-5. Judge the hot AL code against `${CLAUDE_PLUGIN_ROOT}/references/al-rules.md`
+5. Judge the hot AL code against `../../references/al-rules.md` (relative to this
+   `SKILL.md` directory)
    (SetLoadFields, filters before FindSet, CalcSums, subscriber cost) and Microsoft's
    BC performance patterns (https://github.com/microsoft/BCQuality). Report session
    memory (`totalMemoryUsed`) in KiB/MiB/GiB when present.

@@ -1,0 +1,15 @@
+{
+  "name": "bc365-al-toolkit",
+  "displayName": "BC365 AL Toolkit",
+  "version": "1.4.0",
+  "description": "Microsoft Dynamics 365 Business Central AL development toolkit: AL MCP server (16 tools), AL LSP MCP server (7 semantic code intelligence tools), and the al-analyst, al-developer, al-reviewer, al-lsp, al-debugger, al-profiler, and bc365-permissionset skills.",
+  "logo": "assets/logo.svg",
+  "author": {
+    "name": "Nathapol"
+  },
+  "suggestedPrompts": [
+    "Analyze a Business Central requirement with al-analyst and produce a Solution Design",
+    "Implement an AL feature with al-developer and verify a zero-error build",
+    "Review AL changes with al-reviewer using AL MCP and AL LSP references"
+  ]
+}

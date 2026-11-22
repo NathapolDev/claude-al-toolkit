@@ -12,14 +12,17 @@ issues with reasons and concrete fix suggestions.
 
 Review against the official Microsoft AL guidelines,
 https://alguidelines.dev/docs/bestpractices/, and the canonical house rules in
-`${CLAUDE_PLUGIN_ROOT}/references/al-rules.md`.
+`../../references/al-rules.md` (resolve relative `../../` paths from the directory
+containing this loaded `SKILL.md` file, or from `${CLAUDE_PLUGIN_ROOT}` in Claude Code).
 
 ## Workflow
 1. Read the context — the requirement/analysis and what was implemented.
 2. Check requirement coverage — every acceptance criterion met? anything missing / out of scope?
 3. Read the changed code against the checklist below.
 4. **Verify the build yourself** — don't trust a report alone:
-   - **Primary — AL MCP server (`al` MCP, when connected):** load tools via ToolSearch
+   - **Primary — AL MCP server (`al` MCP, when connected):** in Antigravity (`agy`), call
+     tools via `call_mcp_tool` on server `al` (or `al-mcp`), or directly if injected
+     into your toolset; in Claude Code, load them via `ToolSearch`
      (`select:al_compile,al_getdiagnostics,al_downloadsymbols,al_symbolsearch,al_getnextobjectid,al_addproject,al_getpackagedependencies,al_run_tests`
      — same list as al-developer). If a tool answers "No projects are loaded", or the
      workspace has several projects, call `al_addproject` for each and pass `projectPath`
@@ -34,19 +37,23 @@ https://alguidelines.dev/docs/bestpractices/, and the canonical house rules in
         run the fallback script below with `AL_ANALYZERS` set and keep only the lines for
         the changed files (e.g. `| Select-String "<FileName>"`).
    - **Fallback — MCP not connected:** build with the bundled script
-     `${CLAUDE_PLUGIN_ROOT}/scripts/al-build.cmd "<projectDir>"` (alc.exe; ships with this
+     `../../scripts/al-build.cmd "<projectDir>"` (alc.exe; ships with this
      plugin so it works on every machine) and read its diagnostics — it exits non-zero on
      failure and prints `BUILD OK` when clean. Set `AL_ANALYZERS` (e.g.
-     `CodeCop;PerTenantExtensionCop`) to include cop findings. If `al_*` tools are missing, tell the user to check
-     `claude mcp list` (the `al` MCP server is registered by this plugin's `.mcp.json` and
-     needs Claude Code started in the project folder, plus an AL toolchain on the machine:
-     the AL Development Tools .NET tool or the AL Language VS Code extension).
+     `CodeCop;PerTenantExtensionCop`) to include cop findings. If `al_*` tools are
+     missing: in Antigravity, check **Additional Options (...) > MCP Servers**
+     (`mcp_config.json`) and call `al_addproject` if no project was loaded at startup;
+     in Claude Code, tell the user to check `claude mcp list` (the `al` MCP server is
+     registered by this plugin's `mcp_config.json` / `.mcp.json` and needs Claude Code
+     started in the project folder, plus an AL toolchain on the machine: the AL
+     Development Tools .NET tool or the AL Language VS Code extension).
    - If you cannot run any real build, say so explicitly and mark the build check as
      NOT VERIFIED — never assume it compiles.
 5. Check tests — **only if tests were requested or already exist**: review coverage of
    new behavior / public API, and **re-run them yourself** — don't trust the developer's
-   report. Use `al_run_tests` (`codeunitId`, `testMethods`, `projectPath`), or the
-   fallback `${CLAUDE_PLUGIN_ROOT}/scripts/al-test.cmd "<projectDir>" <codeunitId> [--testmethods ...]`
+   report. Use `al_run_tests` (`codeunitId`, `testMethods`, `projectPath` — via
+   `call_mcp_tool` on `al` / `al-mcp` in Antigravity, or `ToolSearch` in Claude Code), or
+   the fallback `../../scripts/al-test.cmd "<projectDir>" <codeunitId> [--testmethods ...]`
    (exit 0 = all pass). Sandbox or container only — if launch.json's configuration is
    `"environmentType": "Production"`, don't run. Count only `data.results[]` rows with a
    `methodName` (the empty-name row is the codeunit summary). A failing test = 🔴 Blocker.
@@ -90,9 +97,13 @@ https://alguidelines.dev/docs/bestpractices/, and the canonical house rules in
   (State/Reason/Tag) + preprocessor symbols; no unintended breaking change to
   public/business events.
 - **I. TransferFields field mapping** — for every new/changed table field, find where its
-  record flows to another table via `TransferFields` (this app's code: the `LSP` tool's
-  `findReferences` on the table or field when available — it skips comments and strings —
-  else grep `TransferFields`; base-app posting/archiving/copy-document flows, e.g. Item Journal
+  record flows to another table via `TransferFields` (this app's code: use `al-lsp`
+  MCP server tools — `al_lsp_references`, plus `al_lsp_definition`, `al_lsp_hover`,
+  `al_lsp_document_symbols`, `al_lsp_workspace_symbols`, `al_lsp_signature_help`,
+  `al_lsp_rename_preview` via `call_mcp_tool` on `al-lsp`, or CLI fallback
+  `../../scripts/al-lsp-mcp.cmd --cli al_lsp_references "<json>"`; in Claude Code, the
+  `LSP` tool's `findReferences` — on the table or field when available, since it skips
+  comments and strings; else grep `TransferFields`; base-app posting/archiving/copy-document flows, e.g. Item Journal
   Line → posted tables, Sales/Purchase Header/Line → posted document tables, both extended
   by this app). `TransferFields` maps by **field ID only**. For each source/target pair,
   compare all of this app's fields (table + tableextensions) side by side by ID:
@@ -105,11 +116,15 @@ https://alguidelines.dev/docs/bestpractices/, and the canonical house rules in
     name/type | result. Fix by aligning IDs/types (mind upgrade impact on tables that
     already hold data); `TransferFields(From, true, true)` only as a stopgap.
 - **L. Callers of changed signatures** — for every existing procedure whose parameters,
-  return type, or `var` usage changed, list callers with
-  `${CLAUDE_PLUGIN_ROOT}/scripts/al-graph.cmd "<projectOrWorkspaceDir>" --to "obj:<Object Name>#<Procedure>" --direction callers`
-  (object names, not IDs; verify the selector with `--from` before trusting 0). A caller
-  that wasn't updated = 🟠 Major. The graph covers only source under that folder; say so
-  when the procedure is public and other apps may call it.
+  return type, or `var` usage changed, list callers with `al-lsp` MCP's
+  `al_lsp_references` (or CLI fallback
+  `../../scripts/al-lsp-mcp.cmd --cli al_lsp_references "<json>"`, or Claude Code's `LSP`
+  `findReferences`) and/or
+  `../../scripts/al-graph.cmd "<projectOrWorkspaceDir>" --to "obj:<Object Name>#<Procedure>" --direction callers`
+  (`al-graph.cmd` takes object names, not IDs; verify the selector with `--from` before
+  trusting 0). A caller that wasn't updated = 🟠 Major. Both tools cover only source
+  under the target workspace/folder; say so when the procedure is public and other apps
+  may call it.
 - **K. Runtime fit** — every language feature used is available at `app.json` `runtime`
   (see al-rules.md "Runtime-Gated Features"); a `runtime` / `application` raise in this
   change is justified and matches every target environment (the compiler won't catch a
@@ -153,5 +168,5 @@ https://alguidelines.dev/docs/bestpractices/, and the canonical house rules in
   return for re-review.
 
 ## Reference
-- Canonical house rules: `${CLAUDE_PLUGIN_ROOT}/references/al-rules.md`
+- Canonical house rules: `../../references/al-rules.md` (relative to this `SKILL.md` directory)
 - AL Best Practices: https://alguidelines.dev/docs/bestpractices/
